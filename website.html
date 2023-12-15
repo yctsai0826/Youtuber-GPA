@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Platform Homepage</title>
+</head>
+<body>
+    <header>
+        <h1>Welcome to Our Video Platform</h1>
+        <form action="#" method="get">
+            <input type="search" name="search" placeholder="Search...">
+            <button type="submit">Search</button>
+        </form>
+    </header>
+
+    <section id="random-videos">
+        <h2>Random Videos</h2>
+        <button onclick="refreshVideos()">Refresh</button>
+        <div class="video-list">
+            <!-- Placeholder for videos -->
+            <div class="video">Video 1</div>
+            <div class="video">Video 2</div>
+            <div class="video">Video 3</div>
+            <div class="video">Video 4</div>
+        </div>
+    </section>
+
+    <section id="daily-rank">
+        <h2>Daily Rank</h2>
+        <select name="region" id="region-select">
+            <option value="tw">Taiwan</option>
+            <option value="de">Germany</option>
+            <option value="us">United States</option>
+            <option value="kr">Korea</option>
+            <option value="fr">France</option>
+            <option value="jp">Japan</option>
+        </select>
+        <div class="ranked-video-list">
+            <!-- Placeholder for ranked videos -->
+            <div class="ranked-video">Ranked Video 1</div>
+            <div class="ranked-video">Ranked Video 2</div>
+            <div class="ranked-video">Ranked Video 3</div>
+            <div class="ranked-video">Ranked Video 4</div>
+        </div>
+    </section>
+
+    <section id="blog">
+        <h2>Blog</h2>
+        <article>
+            <h3>Blog Post Title</h3>
+            <p>Blog post content...</p>
+            <form action="#" method="post">
+                <textarea name="comment" placeholder="Enter comment..."></textarea>
+                <button type="submit">Submit Comment</button>
+            </form>
+        </article>
+    </section>
+
+    <footer>
+        <p>&copy; 2023 Video Platform</p>
+    </footer>
+
+    <script>
+        // Placeholder for JavaScript to refresh videos and handle other interactions
+        function refreshVideos() {
+            // Logic to refresh random videos
+        }
+    </script>
+</body>
+</html>
