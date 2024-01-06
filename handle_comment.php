@@ -3,7 +3,8 @@
 // define('DB_USERNAME', 'root'); // Replace with your database username
 // define('DB_PASSWORD', ''); // Replace with your database password
 // define('DB_NAME', 'Youtuber'); // Replace with your actual database name
-
+session_start();  //很重要，可以用的變數存在session裡
+$username=$_SESSION["username"];
 $response = ['success' => false, 'error' => '', 'comment' => ''];
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -14,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $response['error'] = "Connection failed: " . $conn->connect_error;
         } else {
             $comment = $conn->real_escape_string($_POST['comment']);
-            $sql = "INSERT INTO comments (nickname, content) VALUES ('Guest', '$comment')";
+            $sql = "INSERT INTO comments (nickname, content) VALUES ('".$username."', '$comment')";
 
             if ($conn->query($sql) === TRUE) {
                 $response['success'] = true;
