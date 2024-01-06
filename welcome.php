@@ -13,6 +13,7 @@ echo "<a href='logout.php'>登出</a>";
     <input type="submit" value="更改密碼">
 </form>
 
+<<<<<<< HEAD
  <section id="blog">
         <h2>Blog</h2>
         <article>
@@ -54,6 +55,22 @@ echo "<a href='logout.php'>登出</a>";
                 <!-- PHP代碼結束 -->
             </div>
     </section>
+=======
+<section id="blog">
+    <h2>Blog</h2>
+    <article>
+        <h3>Welcome to our youtube platform</h3>
+        <p>Blog post content...</p>
+        <form id="comment-form">
+            <textarea id="comment-textarea" name="comment" placeholder="Enter comment..."></textarea>
+            <button type="submit">Submit Comment</button>
+        </form>
+        <div id="comments-display">
+            <!-- Comments will be loaded here -->
+        </div>
+    </article>
+</section>
+>>>>>>> c86895e96821394ca5f27e182d0c4e33c0e186a3
 <!-- End of content from website.html -->
 
 <script>
@@ -63,7 +80,11 @@ echo "<a href='logout.php'>登出</a>";
 
             var xhr = new XMLHttpRequest();
             var formData = new FormData(document.getElementById('comment-form'));
+<<<<<<< HEAD
             var username = <?php echo json_encode($username); ?>;
+=======
+
+>>>>>>> c86895e96821394ca5f27e182d0c4e33c0e186a3
             xhr.open('POST', 'handle_comment.php', true);
             xhr.onload = function () {
                 if (xhr.status === 200) {
@@ -71,7 +92,11 @@ echo "<a href='logout.php'>登出</a>";
                     if (response.success) {
                         var commentsDisplay = document.getElementById('comments-display');
                         commentsDisplay.innerHTML += '<div><strong>' +
+<<<<<<< HEAD
                             username + '</strong> ' + response.comment + '</div>';
+=======
+                            'Guest:</strong> ' + response.comment + '</div>';
+>>>>>>> c86895e96821394ca5f27e182d0c4e33c0e186a3
                         document.getElementById('comment-textarea').value = ''; // Clear the textarea
                     } else {
                         alert('Error: ' + response.error);

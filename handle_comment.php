@@ -3,8 +3,11 @@
 // define('DB_USERNAME', 'root'); // Replace with your database username
 // define('DB_PASSWORD', ''); // Replace with your database password
 // define('DB_NAME', 'Youtuber'); // Replace with your actual database name
+<<<<<<< HEAD
 session_start();
 $username=$_SESSION["username"];
+=======
+>>>>>>> c86895e96821394ca5f27e182d0c4e33c0e186a3
 
 $response = ['success' => false, 'error' => '', 'comment' => ''];
 
