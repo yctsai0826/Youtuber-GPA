@@ -1,12 +1,9 @@
-<!-- hi2 -->
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Video Platform Homepage</title>
-
     <script>
         // This function will be called when the form is submitted
         function submitComment(event) {
@@ -21,7 +18,7 @@
                     var response = JSON.parse(xhr.responseText);
                     if (response.success) {
                         var commentsDisplay = document.getElementById('comments-display');
-                        commentsDisplay.innerHTML += '<div><strong>' +
+                        commentsDisplay.innerHTML += '<div><strong>' + 
                             'Guest:</strong> ' + response.comment + '</div>';
                         document.getElementById('comment-textarea').value = ''; // Clear the textarea
                     } else {
@@ -35,56 +32,13 @@
         }
 
         // Function to attach the event listener to the form
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('comment-form').addEventListener('submit', submitComment);
         });
     </script>
-
-
 </head>
-
 <body>
-
-    <header>
-        <h1>Welcome to Our Video Platform</h1>
-        <form action="#" method="get">
-            <input type="search" name="search" placeholder="Search...">
-            <button type="submit">Search</button>
-        </form>
-    </header>
-
-    <section id="random-videos">
-        <h2>Random Videos</h2>
-
-        <button onclick="refreshVideos()">Refresh</button>
-        <div class="video-list">
-            <!-- Placeholder for videos -->
-            <div class="video">Video 1</div>
-            <div class="video">Video 2</div>
-            <div class="video">Video 3</div>
-            <div class="video">Video 4</div>
-        </div>
-    </section>
-
-    <section id="daily-rank">
-        <h2>Daily Rank</h2>
-        <select name="region" id="region-select">
-            <option value="tw">Taiwan</option>
-            <option value="de">Germany</option>
-            <option value="us">United States</option>
-            <option value="kr">Korea</option>
-            <option value="fr">France</option>
-            <option value="jp">Japan</option>
-        </select>
-        <div class="ranked-video-list">
-            <!-- Placeholder for ranked videos -->
-            <div class="ranked-video">Ranked Video 1</div>
-            <div class="ranked-video">Ranked Video 2</div>
-            <div class="ranked-video">Ranked Video 3</div>
-            <div class="ranked-video">Ranked Video 4</div>
-        </div>
-    </section>
-
+    <!-- ... your existing content ... -->
 
     <section id="blog">
         <h2>Blog</h2>
@@ -101,18 +55,6 @@
         </article>
     </section>
 
-
-
-    <footer>
-        <p>&copy; 2023 Video Platform</p>
-    </footer>
-
-    <script>
-        // Placeholder for JavaScript to refresh videos and handle other interactions
-        function refreshVideos() {
-            // Logic to refresh random videos
-        }
-    </script>
+    <!-- ... your existing content ... -->
 </body>
-
 </html>
