@@ -1,20 +1,22 @@
 <?php
-define('DB_SERVER', 'localhost');
-define('DB_USERNAME', 'root'); // Replace with your database username
-define('DB_PASSWORD', ''); // Replace with your database password
-define('DB_NAME', 'phpmyadmin'); // Replace with your actual database name
+// define('DB_SERVER', 'localhost');
+// define('DB_USERNAME', 'root'); // Replace with your database username
+// define('DB_PASSWORD', ''); // Replace with your database password
+// define('DB_NAME', 'Youtuber'); // Replace with your actual database name
+session_start();
+$username=$_SESSION["username"];
 
 $response = ['success' => false, 'error' => '', 'comment' => ''];
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (!empty($_POST['comment'])) {
-        $conn = new mysqli(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_NAME);
+        $conn = require_once "config.php";
 
         if ($conn->connect_error) {
             $response['error'] = "Connection failed: " . $conn->connect_error;
         } else {
             $comment = $conn->real_escape_string($_POST['comment']);
-            $sql = "INSERT INTO comments (nickname, content) VALUES ('Guest', '$comment')";
+            $sql = "INSERT INTO comments (nickname, content) VALUES ('$username', '$comment')";
 
             if ($conn->query($sql) === TRUE) {
                 $response['success'] = true;
