@@ -99,8 +99,8 @@ $conn = require_once "config.php";
         }
 
         .comment {
-            background-color: #f9f9f9; /* 設置背景顏色 */
-            border: 1px solid #ddd; /* 添加邊框 */
+            background-color: solid transparent; /* 設置背景顏色 */
+            border: 1px solid transparent; /* 添加邊框 */
             border-radius: 5px; /* 輕微圓角 */
             padding: 10px; /* 內邊距 */
             margin-bottom: 10px; /* 底部外邊距 */
@@ -126,33 +126,43 @@ $conn = require_once "config.php";
         }
 
         .local {
-            justify-content: flex-end;
             .text {
-                margin-right: 20px;
-                margin-left: 80px;
-                order: -1;
+                z-index: 2;
+                margin-left: 20px;
+                margin-right: 80px;
+                color: #eee;
                 background-color: #fff;
-                color: #333;
                 &::before {
-                border-left: 10px solid #fff;
-                right: -10px;
+                border-right: 10px solid #fff;
+                left: -10px;
                 }
             }
         }
         
-        .local {
-            & .text::before {
-                content: "";
-                position: absolute;
-                top: 20px;
-                border-top: 10px solid transparent;
-                border-bottom: 10px solid transparent;
-            }
-            .text {
-                font-weight: 300;
-                box-shadow: 0 0 10px #888;
-            }
+
+        .local .text::before {
+            content: "";
+            position: absolute;
+            top: 30px;
+            left: -30px; /* 可能需要调整以适应阴影的扩散 */
+            border-top: 10px solid transparent;
+            border-bottom: 30px solid transparent;
+            border-right: 30px solid #fff; /* 颜色应该与 .text 的背景色相匹配 */
+            transform: translateY(-50%);
+            z-index: 1;
+            /* 添加 drop-shadow 阴影效果 */
+            /* filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); */
         }
+
+
+        .local .text {
+            z-index: 3;
+            font-weight: 300;
+            box-shadow: 0 0 10px #888;
+            /* 其他样式 */
+        }
+
+
 
 
 
@@ -337,14 +347,18 @@ $conn = require_once "config.php";
                 $result = $conn->query($sql);
 
                 if ($result && $result->num_rows > 0) {
-                    // 輸出評論
+                    // 输出评论
                     while ($row = $result->fetch_assoc()) {
-                        echo "<div class='comment'>";
+                        echo "<div class='comment local'>"; // 开始一个新的评论容器
+                        echo "<div class='text'>"; // 开始文本内容的容器
                         echo "<p><strong>" . htmlspecialchars($row['nickname']) . "</strong><span>" . htmlspecialchars($row['created_at']) . "</span></p>";
                         echo "<p>" . htmlspecialchars($row['content']) . "</p>";
-                        echo "</div>";
+                        echo "</div>"; // 结束文本内容的容器
+                        echo "</div>"; // 结束当前评论的容器
                     }
                 }
+                
+                
                 ?>
                 <!-- PHP代碼結束 -->
             </div>
