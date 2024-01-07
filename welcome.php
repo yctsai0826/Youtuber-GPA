@@ -9,7 +9,7 @@ $user_id = $_SESSION["user_id"];
 
 <head>
     <meta charset="UTF-8">
-    <title>视频列表</title>
+    <title>影片列表</title>
     <style>
         body {
             /*color <body>*/
@@ -127,7 +127,7 @@ $user_id = $_SESSION["user_id"];
                 act = "unstar";
             }
             xhr.send("video_id=" + (video_id) + "&action=" + act);
-            function updatePlaylist(video_id, isStarred);
+            // function updatePlaylist(video_id, isStarred);
         }
 
         function updatePlaylist(video_id, isStarred) {
@@ -170,7 +170,7 @@ $user_id = $_SESSION["user_id"];
 
     <?php
     $conn = require_once "config.php";
-
+    echo "test";
     $search = isset($_GET['search']) ? $_GET['search'] : '';
 
     $sql = "SELECT a.yv_id, thumbnail_link, title ,a.sv_id
@@ -233,7 +233,7 @@ $user_id = $_SESSION["user_id"];
     }
 
 
-    $conn->close();
+    // $conn->close();
     ?>
 
 
@@ -257,7 +257,7 @@ $user_id = $_SESSION["user_id"];
                 <!-- PHP代碼從這裡開始 -->
                 <?php
                 // 連接到數據庫
-                $conn = require_once "config.php";
+                // $conn = require_once "config.php";
 
                 // 檢查連接
                 if ($conn->connect_error) {
