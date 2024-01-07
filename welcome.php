@@ -10,7 +10,7 @@ $conn = require_once "config.php";
 
 <head>
     <meta charset="UTF-8">
-    <title>视频列表</title>
+    <title>影片列表</title>
     <style>
         body {
             /*color <body>*/
@@ -104,8 +104,8 @@ $conn = require_once "config.php";
             var xhr = new XMLHttpRequest();
             xhr.open("POST", "star_video.php", true);
             xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-            xhr.onreadystatechange = function () {
-                xhr.onreadystatechange = function () {
+            xhr.onreadystatechange = function() {
+                xhr.onreadystatechange = function() {
                     if (this.readyState === XMLHttpRequest.DONE) {
                         if (this.status === 200) {
                             try {
@@ -114,23 +114,20 @@ $conn = require_once "config.php";
                                     if (isStarred === 'true') { //原本是亮的
                                         starElement.classList.remove('on');
                                         starElement.setAttribute('data-starred', 'false');
-                                    }
-                                    else {
+                                    } else {
                                         starElement.classList.add('on');
                                         starElement.setAttribute('data-starred', 'true');
                                     }
-                                }
-                                else if (response.error) {
+                                } else if (response.error) {
                                     if (isStarred) {
                                         alert("fail to unstar video");
-                                    }
-                                    else {
+                                    } else {
                                         alert("fail to star video");
 
                                     }
                                 }
                             } catch (e) {
-                                console.error("JSON 解析错误:", e);//json format error
+                                console.error("JSON 解析错误:", e); //json format error
                                 console.log("接收到的响应:", this.responseText);
                             }
                         } else {
@@ -155,7 +152,7 @@ $conn = require_once "config.php";
                 if (xhr.status === 200) {
                     var response = JSON.parse(xhr.responseText);
                     if (response.success === 'YES') {
-                        updatePlaylistDisplay();  // Update the playlist display on the page
+                        updatePlaylistDisplay(); // Update the playlist display on the page
                     } else {
                         alert('Error: ' + (response.error || 'Failed to update the playlist.'));
                     }
@@ -165,8 +162,6 @@ $conn = require_once "config.php";
             };
             xhr.send(formData);
         }
-
-
     </script>
 </head>
 
@@ -175,8 +170,18 @@ $conn = require_once "config.php";
 
 
     echo "<h1>你好 " . $username . "</h1>";
-    echo "<a href='logout.php'>登出</a>";
+    echo "<a href='logout.php'>登出</a><br>";
+    echo "<a href='change.php'>更改密碼</a><br>";
     ?>
+
+    <!-- <form method="post" action="logout.php">
+        <input type="submit" value="登出">
+    </form> -->
+
+
+    <!-- <a href="change.php">更改密码</a> -->
+
+
 
     <!-- 在这里添加搜索表单 -->
     <form action="welcome.php" method="get">
@@ -186,8 +191,6 @@ $conn = require_once "config.php";
 
 
     <?php
-    // $conn = require_once "config.php";
-    
     $search = isset($_GET['search']) ? $_GET['search'] : '';
 
     $sql = "SELECT a.yv_id, thumbnail_link, title ,a.sv_id
@@ -250,16 +253,7 @@ $conn = require_once "config.php";
     }
 
 
-
     ?>
-
-
-    <h2>更改密碼</h2>
-    <form action="change.php" method="post">
-        新密碼：<input type="password" name="new_password"><br>
-        確認新密碼：<input type="password" name="confirm_new_password"><br>
-        <input type="submit" value="更改密碼">
-    </form>
 
     <section id="blog">
         <h2>Blog</h2>
@@ -274,7 +268,7 @@ $conn = require_once "config.php";
                 <?php
                 // 連接到數據庫
                 // $conn = require_once "config.php";
-                
+
                 // 檢查連接
                 if ($conn->connect_error) {
                     die("Connection failed: " . $conn->connect_error);
@@ -303,13 +297,13 @@ $conn = require_once "config.php";
     <script>
         // This function will be called when the form is submitted
         function submitComment(event) {
-            event.preventDefault();  // Prevent normal form submission
+            event.preventDefault(); // Prevent normal form submission
 
             var xhr = new XMLHttpRequest();
             var formData = new FormData(document.getElementById('comment-form'));
             var username = <?php echo json_encode($username); ?>;
             xhr.open('POST', 'handle_comment.php', true);
-            xhr.onload = function () {
+            xhr.onload = function() {
                 if (xhr.status === 200) {
                     var response = JSON.parse(xhr.responseText);
                     if (response.success) {
@@ -328,7 +322,7 @@ $conn = require_once "config.php";
         }
 
         // Function to attach the event listener to the form
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('comment-form').addEventListener('submit', submitComment);
         });
     </script>
