@@ -105,50 +105,39 @@ $conn = require_once "config.php";
             xhr.open("POST", "star_video.php", true);
             xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
             xhr.onreadystatechange = function() {
-                xhr.onreadystatechange = function() {
-                    if (this.readyState === XMLHttpRequest.DONE) {
-                        if (this.status === 200) {
-                            try {
-                                var response = JSON.parse(this.responseText);
-                                if (response.success === 'YES') {
-                                    if (isStarred === 'true') { //原本是亮的
-                                        starElement.classList.remove('on');
-                                        starElement.setAttribute('data-starred', 'false');
-                                    } else {
-                                        starElement.classList.add('on');
-                                        starElement.setAttribute('data-starred', 'true');
-                                    }
-                                } else if (response.error) {
-                                    if (isStarred) {
-                                        alert("fail to unstar video");
-                                    } else {
-                                        alert("fail to star video");
-
-                                    }
-                                }
-                            } catch (e) {
-                                console.error("JSON 解析错误:", e); //json format error
-                                console.log("接收到的响应:", this.responseText);
+                if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+                    try {
+                        var response = JSON.parse(this.responseText);
+                        if (response.success === 'YES') {
+                            // 更新星标按钮的样式
+                            if (isStarred === 'true') {
+                                starElement.classList.remove('on');
+                                starElement.setAttribute('data-starred', 'false');
+                            } else {
+                                starElement.classList.add('on');
+                                starElement.setAttribute('data-starred', 'true');
                             }
-                        } else {
-                            console.error("请求错误，状态码:", this.status); // request connect error
+                            // 在这里添加逻辑来更新页面上的播放列表或其他元素
+                        } else if (response.error) {
+                            alert("操作失败: " + response.error);
                         }
+                    } catch (e) {
+                        console.error("JSON 解析错误:", e);
                     }
-                };
-
+                } else if (this.readyState === XMLHttpRequest.DONE) {
+                    console.error("请求错误，状态码:", this.status);
+                }
             };
-            var act = "star";
-            if (isStarred === 'true') { //html 要用字串 
-                act = "unstar";
-            }
-            xhr.send("video_id=" + (video_id) + "&action=" + act);
-            //function updatePlaylist(video_id, isStarred);
+
+            var act = isStarred === 'true' ? "unstar" : "star";
+            xhr.send("video_id=" + encodeURIComponent(video_id) + "&action=" + act);
         }
 
+
         function updatePlaylist(video_id, isStarred) {
-            event.preventDefault();  // Prevent default form submission if used within a form
+            event.preventDefault(); // Prevent default form submission if used within a form
             xhr.open('POST', 'show_playlist.php', true);
-            xhr.onload = function () {
+            xhr.onload = function() {
                 if (xhr.status === 200) {
                     var response = JSON.parse(xhr.responseText);
                     if (response.success === 'YES') {
@@ -193,10 +182,10 @@ $conn = require_once "config.php";
     <?php
     $search = isset($_GET['search']) ? $_GET['search'] : '';
 
-    $sql = "SELECT a.yv_id, thumbnail_link, title ,a.sv_id
-    FROM (SELECT youtube.youtube_video_id as yv_id, thumbnail_link, title, star.video_id as sv_id,ROW_NUMBER() 
+    $sql = "SELECT a.v_id, a.yv_id, thumbnail_link, title ,a.sv_id
+    FROM (SELECT youtube.video_id as v_id, youtube.youtube_video_id as yv_id, thumbnail_link, title, star.video_id as sv_id,ROW_NUMBER() 
     OVER (PARTITION BY youtube.youtube_video_id) AS rn FROM youtube_trending_videos as youtube
-    LEFT JOIN star ON ( user_id = $user_id AND star.video_id = youtube.youtube_video_id)) as a ";
+    LEFT JOIN star ON ( user_id = $user_id AND star.video_id = youtube.video_id)) as a ";
     if ($search !== '') {
         $sql .= " WHERE title LIKE '%" . $conn->real_escape_string($search) . "%'";
         $sql .= " AND rn = 1 LIMIT 10";
@@ -220,11 +209,11 @@ $conn = require_once "config.php";
             echo "</div>";
             echo "<div class='video-info'>";
             //star
-            echo "<div class='video' data-video-id='" . $row['yv_id'] . "'>"; // Fixed the syntax here
+            echo "<div class='video' data-video-id='" . $row['v_id'] . "'>"; // Fixed the syntax here
             echo "<span class='" . (empty($row['sv_id']) ? 'star-btn' : 'star-btn on') . "' 
             onclick='handleStarClick(this)' 
-            data-starred='" . (empty($row['sv_id']) ? 'false' : 'true') . "' 
-            data-video-id='" . htmlspecialchars($row['yv_id']) . "'>&#9733;
+            data-starred='" . (empty($row['sv_id']) ? 'false' : 'true') . "'
+            data-video-id='" . htmlspecialchars($row['v_id']) . "'>&#9733;
             </span>"; //. class # id
             echo "<style>
                 .star-btn {
@@ -287,7 +276,6 @@ $conn = require_once "config.php";
                         echo "</div>";
                     }
                 }
-
                 ?>
                 <!-- PHP代碼結束 -->
             </div>
@@ -334,7 +322,7 @@ $conn = require_once "config.php";
                 // 連接到數據庫
                 // 確保已經包含了數據庫連接代碼
                 // 例如: $conn = new mysqli('主機', '用戶名', '密碼', '數據庫名');
-                
+
                 // 檢查連接
                 if ($conn->connect_error) {
                     die("連接失敗: " . $conn->connect_error);

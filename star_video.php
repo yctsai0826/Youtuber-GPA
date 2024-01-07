@@ -26,6 +26,7 @@ if ($action == 'star') {
 
         $stmt->close();
     }
+    
 } elseif ($action == 'unstar') {
     $stmt = $conn->prepare("DELETE FROM star WHERE user_id = ? AND video_id = ?");
 
@@ -47,4 +48,6 @@ if ($action == 'star') {
 $conn->close();
 echo json_encode($response);
 exit();
+
+
 ?>
