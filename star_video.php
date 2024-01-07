@@ -9,7 +9,7 @@ $user_id = $_SESSION['user_id'];
 $action = $_POST['action'];
 
 if ($action == 'star') {
-    $comment = $_POST['comment']; // 假设 'comment' 是从 POST 请求传递的
+
     $stmt = $conn->prepare("INSERT INTO star (user_id, video_id) VALUES (?, ?)");
 
     if ($stmt === false) {

@@ -253,6 +253,50 @@ $conn = require_once "config.php";
                 <textarea id="comment-textarea" name="comment" placeholder="Enter comment..."></textarea>
                 <button type="submit">Submit Comment</button>
             </form>
+            <script>
+                // This function will be called when the form is submitted
+                function submitComment(event) {
+                    event.preventDefault(); // 防止表單的默認提交行為
+
+                    var xhr = new XMLHttpRequest();
+                    var formData = new FormData(document.getElementById('comment-form'));
+                    xhr.open('POST', 'handle_comment.php', true);
+                    xhr.onload = function() {
+                        if (xhr.status === 200) {
+                            var response = JSON.parse(xhr.responseText);
+                            if (response.success) {
+                                var commentsDisplay = document.getElementById('comments-display');
+                                // 獲取當前時間並格式化為 ISO 8601 字符串
+                                var now = new Date();
+                                var year = now.getFullYear();
+                                var month = ('0' + (now.getMonth() + 1)).slice(-2);
+                                var day = ('0' + now.getDate()).slice(-2);
+                                var hours = ('0' + now.getHours()).slice(-2);
+                                var minutes = ('0' + now.getMinutes()).slice(-2);
+                                var seconds = ('0' + now.getSeconds()).slice(-2);
+                                var timeString = year + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':' + seconds;
+                                // 創建顯示留言和時間的HTML
+                                var newCommentHTML = '<div><strong>' + 'test' + '</strong> ' + timeString + '<br>' +'<br>' + response.comment + '</div>';
+                                // 將新留言插入到留言顯示區域的開始位置
+                                commentsDisplay.insertAdjacentHTML('afterbegin', newCommentHTML);
+                                document.getElementById('comment-textarea').value = ''; // 清空文本區域
+                            } else {
+                                alert('Error: ' + response.error);
+                            }
+                        } else {
+                            alert('An error occurred while submitting the comment.');
+                        }
+                    };
+                    xhr.send(formData);
+                }
+
+
+
+                // Function to attach the event listener to the form
+                document.addEventListener('DOMContentLoaded', function() {
+                    document.getElementById('comment-form').addEventListener('submit', submitComment);
+                });
+            </script>
             <div id="comments-display">
                 <?php
                 // 連接到數據庫
@@ -282,42 +326,11 @@ $conn = require_once "config.php";
     </section>
     <!-- End of content from website.html -->
 
-    <script>
-        // This function will be called when the form is submitted
-        function submitComment(event) {
-            event.preventDefault(); // Prevent normal form submission
 
-            var xhr = new XMLHttpRequest();
-            var formData = new FormData(document.getElementById('comment-form'));
-            var username = <?php echo json_encode($username); ?>;
-            xhr.open('POST', 'handle_comment.php', true);
-            xhr.onload = function() {
-                if (xhr.status === 200) {
-                    var response = JSON.parse(xhr.responseText);
-                    if (response.success) {
-                        var commentsDisplay = document.getElementById('comments-display');
-                        commentsDisplay.innerHTML += '<div><strong>' +
-                            username + '</strong> ' + response.comment + '</div>';
-                        document.getElementById('comment-textarea').value = ''; // Clear the textarea
-                    } else {
-                        alert('Error: ' + response.error);
-                    }
-                } else {
-                    alert('An error occurred while submitting the comment.');
-                }
-            };
-            xhr.send(formData);
-        }
-
-        // Function to attach the event listener to the form
-        document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('comment-form').addEventListener('submit', submitComment);
-        });
-    </script>
     <section id="palylist">
         <div class="right-sidebar">
             <h2>Playlist</h2>
-            <div id="comments-display">
+            <div id="playlist-display">
                 <?php
                 // 連接到數據庫
                 // 確保已經包含了數據庫連接代碼
