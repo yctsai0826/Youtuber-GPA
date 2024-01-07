@@ -100,6 +100,75 @@ $conn = require_once "config.php";
                 /* 小屏幕时只有一列 */
             }
         }
+
+        .text {
+            background-color: #aaa;
+            padding: 16px;
+            border-radius: 10px;
+            position: relative;
+        }
+
+        .comment {
+            background-color: #f9f9f9; /* 設置背景顏色 */
+            border: 1px solid #ddd; /* 添加邊框 */
+            border-radius: 5px; /* 輕微圓角 */
+            padding: 10px; /* 內邊距 */
+            margin-bottom: 10px; /* 底部外邊距 */
+            max-width: 500px; /* 最大寬度 */
+            margin-left: 20px; /* 或者您希望的任何具体数值 */
+        }
+
+        .comment p {
+            margin: 5px 0; /* 段落間距 */
+            line-height: 1.5; /* 行高 */
+            color: #333; /* 文本顏色 */
+        }
+
+        .comment strong {
+            color: #0066cc; /* 用戶名顏色 */
+            display: block; /* 塊級元素 */
+            margin-bottom: 5px; /* 與文本間的距離 */
+        }
+
+        .comment span {
+            font-size: 0.9em; /* 發送時間的字體大小 */
+            color: #777; /* 發送時間的顏色 */
+        }
+
+        .local {
+            justify-content: flex-end;
+            .text {
+                margin-right: 20px;
+                margin-left: 80px;
+                order: -1;
+                background-color: #fff;
+                color: #333;
+                &::before {
+                border-left: 10px solid #fff;
+                right: -10px;
+                }
+            }
+        }
+        
+        .local {
+            & .text::before {
+                content: "";
+                position: absolute;
+                top: 20px;
+                border-top: 10px solid transparent;
+                border-bottom: 10px solid transparent;
+            }
+            .text {
+                font-weight: 300;
+                box-shadow: 0 0 10px #888;
+            }
+        }
+
+
+
+
+
+
     </style>
     <script>
         function handleStarClick(starElement) {
@@ -329,9 +398,10 @@ $conn = require_once "config.php";
                 document.getElementById('comment-form').addEventListener('submit', submitComment);
             });
         </script>
+
         <div class="right-sidebar">
             <h2>Playlist</h2>
-            <div id="comments-display">
+            <div id="playlist-display">
                 <?php
                 // 連接到數據庫
                 // 確保已經包含了數據庫連接代碼
