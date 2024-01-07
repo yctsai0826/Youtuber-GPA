@@ -26,20 +26,21 @@ $conn = require_once "config.php";
     <style>
         .youtube-videos {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            /* 创建多列，每列至少 250px 宽，自动填充剩余空间 */
+            grid-template-columns: repeat(5, 250px);
+            /* Three columns with equal width */
             grid-gap: 15px;
-            /* 网格项之间的间隙 */
+            /* Space between grid items */
             margin: 20px;
-            /* 容器的外边距 */
+            /* Margin around the container */
         }
+
 
         .youtube-video {
             background: #fff;
             /* 背景颜色 */
             border: 1px solid #ddd;
             /* 边框 */
-            border-radius: 5px;
+            border-radius: 10px;
             /* 边框圆角 */
             overflow: hidden;
             /* 内容溢出隐藏 */
@@ -64,6 +65,22 @@ $conn = require_once "config.php";
             /* 文本颜色 */
             font-weight: bold;
             /* 字体加粗 */
+        }
+
+        .right-sidebar {
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 200px;
+            /* Fixed width for the sidebar */
+            background-color: #f9f9f9;
+            /* Light gray background */
+            padding: 20px;
+            /* Padding inside the sidebar */
+            border-radius: 10px;
+            /* Rounded corners */
+            border: 1px solid #ccc;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
         }
 
         /* 响应式设计 */
@@ -126,7 +143,6 @@ $conn = require_once "config.php";
             }
             xhr.send("video_id=" + (video_id) + "&action=" + act);
             //function updatePlaylist(video_id, isStarred);
-
         }
 
         function updatePlaylist(video_id, isStarred) {
@@ -175,18 +191,17 @@ $conn = require_once "config.php";
 
 
     <?php
-
     $search = isset($_GET['search']) ? $_GET['search'] : '';
 
     $sql = "SELECT a.yv_id, thumbnail_link, title ,a.sv_id
-    FROM (SELECT youtube.video_id as yv_id, thumbnail_link, title, star.video_id as sv_id,ROW_NUMBER() 
-    OVER (PARTITION BY youtube.video_id) AS rn FROM youtube_trending_videos as youtube
-    LEFT JOIN star ON ( user_id = $user_id AND star.video_id = youtube.video_id)) as a ";
+    FROM (SELECT youtube.youtube_video_id as yv_id, thumbnail_link, title, star.video_id as sv_id,ROW_NUMBER() 
+    OVER (PARTITION BY youtube.youtube_video_id) AS rn FROM youtube_trending_videos as youtube
+    LEFT JOIN star ON ( user_id = $user_id AND star.video_id = youtube.youtube_video_id)) as a ";
     if ($search !== '') {
         $sql .= " WHERE title LIKE '%" . $conn->real_escape_string($search) . "%'";
-        $sql .= " AND rn = 1 LIMIT 5";
+        $sql .= " AND rn = 1 LIMIT 10";
     } else {
-        $sql .= " WHERE rn = 1 LIMIT 5";
+        $sql .= " WHERE rn = 1 LIMIT 10";
     }
     // $sql = "SELECT video_id, thumbnail_link, title FROM youtube_trending_videos LIMIT 5";
     error_log($sql);
@@ -237,6 +252,7 @@ $conn = require_once "config.php";
         echo "<p>没有找到视频。</p>";
     }
 
+
     ?>
 
     <section id="blog">
@@ -252,6 +268,7 @@ $conn = require_once "config.php";
                 <?php
                 // 連接到數據庫
                 // $conn = require_once "config.php";
+
                 // 檢查連接
                 if ($conn->connect_error) {
                     die("Connection failed: " . $conn->connect_error);
@@ -271,7 +288,6 @@ $conn = require_once "config.php";
                     }
                 }
 
-                $conn->close();
                 ?>
                 <!-- PHP代碼結束 -->
             </div>
@@ -311,74 +327,66 @@ $conn = require_once "config.php";
         });
     </script>
     <section id="palylist">
-        <h2>Playlist</h2>
-        <article>
-            <div class="right-sidebar">
-                <div class="right-sidebar">
-                    <div id="comments-display">
-                        <?php
-                        if ($conn->connect_error) {
-                            die("Connection failed: " . $conn->connect_error);
-                        }
-                        $sql = "SELECT a.title from (select title from star left join youtube_trending_videos as youtube on youtube.video_id = star.video_id) as a where user_id = $user_id ";
-                        $result = $conn->query($sql);
+        <div class="right-sidebar">
+            <h2>Playlist</h2>
+            <div id="comments-display">
+                <?php
+                // 連接到數據庫
+                // 確保已經包含了數據庫連接代碼
+                // 例如: $conn = new mysqli('主機', '用戶名', '密碼', '數據庫名');
+                
+                // 檢查連接
+                if ($conn->connect_error) {
+                    die("連接失敗: " . $conn->connect_error);
+                }
 
-                        if ($result && $result->num_rows > 0) {
-                            // 輸出評論
-                            while ($row = $result->fetch_assoc()) {
-                                echo "<div class='playllist'>";
-                                echo "<p><strong>" . htmlspecialchars($row['nickname']) . "</strong> <span></p>";
-                                echo "</div>";
-                            }
-                        }
+                // 假設 $user_id 包含當前用戶的 ID
+                $user_id = $_SESSION["user_id"];
 
-                        $conn->close();
-                        ?>
+                // 準備 SQL 查詢來選擇所有被該用戶標記的影片
+                // 注意: 這裡我假設 'youtube_video_id' 是正確的欄位名
+                $sql = "SELECT DISTINCT youtube.video_id, youtube.title, youtube.thumbnail_link 
+                        FROM youtube_trending_videos AS youtube 
+                        INNER JOIN star ON youtube.video_id = star.video_id 
+                        WHERE star.user_id = ?";
+                // 預處理和綁定
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param("i", $user_id);
 
-                    </div>
-                    <section class="right-sidebar">
-                        <!-- 右侧部分的内容 -->
-                    </section>
-                </div>
-                <style>
-                    /* Styling for the overall container */
-                    .container {
-                        display: flex;
-                        justify-content: center;
-                        /* Center the content horizontally */
-                        align-items: start;
-                        /* Align items to the top */
-                        gap: 20px;
-                        /* Space between main content and sidebar */
-                        margin: 20px;
-                        /* Margin around the container */
+                // 執行語句並獲取結果
+                $stmt->execute();
+                $result = $stmt->get_result();
+
+                // 檢查是否有結果
+                if ($result->num_rows > 0) {
+                    // 輸出每個影片的信息
+                    while ($row = $result->fetch_assoc()) {
+                        echo "<div class='video'>";
+                        echo "<img src='" . htmlspecialchars($row['thumbnail_link']) . "' alt='Thumbnail'>";
+                        echo "<h3>" . htmlspecialchars($row['title']) . "</h3>";
+                        // 可以添加更多影片的信息，如描述、鏈接等
+                        echo "</div>";
                     }
+                } else {
+                    echo "沒有找到收藏的影片。";
+                }
+                ?>
 
-                    /* Styling for the main content area */
-                    .main-content {
-                        flex-grow: 1;
-                        background-color: #ababab;
-                        padding: 20px;
-                        border-radius: 10px;
-                        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-                        /* Subtle shadow */
-                        /* Additional styles can be added here */
-                    }
-
-                    /* Styling for the right sidebar */
-                    .right-sidebar {
-                        width: 300px;
-                        /* Fixed width for the sidebar */
-                        background-color: #f9f9f9;
-                        /* Light gray background */
-                        padding: 20px;
-                        /* Padding inside the sidebar */
-                        border-radius: 10px;
-                        /* Rounded corners */
-                        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-                        /* Subtle shadow */
-                        /* Additional styles can be added here */
-                    }
-                </style>
+            </div>
+        </div>
+    </section>
+    </div>
+    <style>
+        /* Styling for the main content area */
+        .main-content {
+            flex-grow: 1;
+            background-color: #ababab;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            /* Subtle shadow */
+            /* Additional styles can be added here */
+        }
+    </style>
     </section>
 </body>
