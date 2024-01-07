@@ -19,7 +19,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Store data in session variables
         $_SESSION["loggedin"] = true;
         //這些是之後可以用到的變數
-        $_SESSION["id"] = $row["id"];
+        $_SESSION["user_id"] = $row["user_id"];
+        //error_log("user_id=" . $_SESSION["user_id"] . "," . $row["user_id"]);
         // $_SESSION["id"] = mysqli_fetch_assoc($result)["id"];
         $_SESSION["username"] = $username;
         // $_SESSION["username"] = mysqli_fetch_assoc($result)["username"];
