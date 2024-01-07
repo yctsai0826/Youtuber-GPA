@@ -3,6 +3,7 @@ session_start();  //很重要，可以用的變數存在session裡
 $username = $_SESSION["username"];
 $user_id = $_SESSION["user_id"];
 //error_log(var_dump($_SESSION));
+$conn = require_once "config.php";
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -124,14 +125,14 @@ $user_id = $_SESSION["user_id"];
                 act = "unstar";
             }
             xhr.send("video_id=" + (video_id) + "&action=" + act);
-            // function updatePlaylist(video_id, isStarred);
+            //function updatePlaylist(video_id, isStarred);
+
         }
 
         function updatePlaylist(video_id, isStarred) {
-            event.preventDefault(); // Prevent default form submission if used within a form
-            xhr.open('POST', 'add_to_playlist.php', true);
-            //
-            xhr.onload = function() {
+            event.preventDefault();  // Prevent default form submission if used within a form
+            xhr.open('POST', 'show_playlist.php', true);
+            xhr.onload = function () {
                 if (xhr.status === 200) {
                     var response = JSON.parse(xhr.responseText);
                     if (response.success === 'YES') {
@@ -174,7 +175,7 @@ $user_id = $_SESSION["user_id"];
 
 
     <?php
-    $conn = require_once "config.php";
+
     $search = isset($_GET['search']) ? $_GET['search'] : '';
 
     $sql = "SELECT a.yv_id, thumbnail_link, title ,a.sv_id
@@ -248,11 +249,9 @@ $user_id = $_SESSION["user_id"];
                 <button type="submit">Submit Comment</button>
             </form>
             <div id="comments-display">
-                <!-- PHP代碼從這裡開始 -->
                 <?php
                 // 連接到數據庫
                 // $conn = require_once "config.php";
-
                 // 檢查連接
                 if ($conn->connect_error) {
                     die("Connection failed: " . $conn->connect_error);
@@ -270,8 +269,6 @@ $user_id = $_SESSION["user_id"];
                         echo "<p>" . htmlspecialchars($row['content']) . "</p>";
                         echo "</div>";
                     }
-                } else {
-                    echo "<p>還沒有評論。</p>";
                 }
 
                 $conn->close();
@@ -313,5 +310,75 @@ $user_id = $_SESSION["user_id"];
             document.getElementById('comment-form').addEventListener('submit', submitComment);
         });
     </script>
+    <section id="palylist">
+        <h2>Playlist</h2>
+        <article>
+            <div class="right-sidebar">
+                <div class="right-sidebar">
+                    <div id="comments-display">
+                        <?php
+                        if ($conn->connect_error) {
+                            die("Connection failed: " . $conn->connect_error);
+                        }
+                        $sql = "SELECT a.title from (select title from star left join youtube_trending_videos as youtube on youtube.video_id = star.video_id) as a where user_id = $user_id ";
+                        $result = $conn->query($sql);
 
-    <body>
+                        if ($result && $result->num_rows > 0) {
+                            // 輸出評論
+                            while ($row = $result->fetch_assoc()) {
+                                echo "<div class='playllist'>";
+                                echo "<p><strong>" . htmlspecialchars($row['nickname']) . "</strong> <span></p>";
+                                echo "</div>";
+                            }
+                        }
+
+                        $conn->close();
+                        ?>
+
+                    </div>
+                    <section class="right-sidebar">
+                        <!-- 右侧部分的内容 -->
+                    </section>
+                </div>
+                <style>
+                    /* Styling for the overall container */
+                    .container {
+                        display: flex;
+                        justify-content: center;
+                        /* Center the content horizontally */
+                        align-items: start;
+                        /* Align items to the top */
+                        gap: 20px;
+                        /* Space between main content and sidebar */
+                        margin: 20px;
+                        /* Margin around the container */
+                    }
+
+                    /* Styling for the main content area */
+                    .main-content {
+                        flex-grow: 1;
+                        background-color: #ababab;
+                        padding: 20px;
+                        border-radius: 10px;
+                        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                        /* Subtle shadow */
+                        /* Additional styles can be added here */
+                    }
+
+                    /* Styling for the right sidebar */
+                    .right-sidebar {
+                        width: 300px;
+                        /* Fixed width for the sidebar */
+                        background-color: #f9f9f9;
+                        /* Light gray background */
+                        padding: 20px;
+                        /* Padding inside the sidebar */
+                        border-radius: 10px;
+                        /* Rounded corners */
+                        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                        /* Subtle shadow */
+                        /* Additional styles can be added here */
+                    }
+                </style>
+    </section>
+</body>
