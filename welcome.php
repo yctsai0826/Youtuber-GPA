@@ -10,7 +10,7 @@ $conn = require_once "config.php";
 
 <head>
     <meta charset="UTF-8">
-    <title>视频列表</title>
+    <title>影片列表</title>
     <style>
         body {
             /*color <body>*/
@@ -129,6 +129,7 @@ $conn = require_once "config.php";
             }
             xhr.send("video_id=" + (video_id) + "&action=" + act);
             //function updatePlaylist(video_id, isStarred);
+
         }
 
         function updatePlaylist(video_id, isStarred) {
@@ -169,8 +170,6 @@ $conn = require_once "config.php";
 
 
     <?php
-    // $conn = require_once "config.php";
-    
     $search = isset($_GET['search']) ? $_GET['search'] : '';
 
     $sql = "SELECT a.yv_id, thumbnail_link, title ,a.sv_id
@@ -233,7 +232,6 @@ $conn = require_once "config.php";
     }
 
 
-
     ?>
 
 
@@ -257,7 +255,6 @@ $conn = require_once "config.php";
                 <?php
                 // 連接到數據庫
                 // $conn = require_once "config.php";
-                
                 // 檢查連接
                 if ($conn->connect_error) {
                     die("Connection failed: " . $conn->connect_error);
