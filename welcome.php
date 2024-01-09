@@ -11,6 +11,7 @@ $conn = require_once "config.php";
 <head>
     <meta charset="UTF-8">
     <title>影片列表</title>
+    <link rel="icon" type="image/ico" href="loopy.ico">
     <style>
         body {
             /*color <body>*/
@@ -22,10 +23,12 @@ $conn = require_once "config.php";
         h1 {
             color: #0066cc;
         }
-    </style>
-    <style>
+
+
         .header {
-            z-index: 10;
+            grid-column: 2 / 4;
+            grid-row: 1;
+            /*z-index: 10;*/
             padding: 20px;
             text-align: center;
             background: #1abc9c;
@@ -76,21 +79,41 @@ $conn = require_once "config.php";
             /* 字体加粗 */
         }
 
+        .star-btn {
+            cursor: pointer;
+            color: grey;
+            font-size: 24px;
+        }
+
+        .star-btn.on {
+            color: gold;
+        }
+
+        .star-btn:hover,
+        .star-btn:active {
+            color: rgb(232, 166, 14);
+        }
+
         .right-sidebar {
-            position: absolute;
-            top: 35%;
+            position: fixed;
+            top: 50%;
             right: 0;
             z-index: 5;
             width: 200px;
-            /* Fixed width for the sidebar */
-            background-color: #f9f9f9;
-            /* Light gray background */
+            background-color: #C4E1DD;
             padding: 20px;
-            /* Padding inside the sidebar */
             border-radius: 10px;
-            /* Rounded corners */
             border: 1px solid #ccc;
             box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+            transform: translateY(-50%);
+        }
+
+        .main-content {
+            flex-grow: 1;
+            background-color: #ababab;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
         /* 响应式设计 */
@@ -101,80 +124,17 @@ $conn = require_once "config.php";
             }
         }
     </style>
-    <script>
-        function handleStarClick(starElement) {
-            //var title = starElement.getAttribute('data-title');
-            var video_id = starElement.getAttribute('data-video-id');
-            var isStarred = starElement.getAttribute('data-starred');
-            starVideo(video_id, starElement, isStarred);
-        }
-
-        // 保留您现有的 starVideo 和 unstarVideo 函数
-        function starVideo(video_id, starElement, isStarred) {
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", "star_video.php", true);
-            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-            xhr.onreadystatechange = function () {
-                if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
-                    try {
-                        var response = JSON.parse(this.responseText);
-                        if (response.success === 'YES') {
-                            // 更新星标按钮的样式
-                            if (isStarred === 'true') {
-                                starElement.classList.remove('on');
-                                starElement.setAttribute('data-starred', 'false');
-                            } else {
-                                starElement.classList.add('on');
-                                starElement.setAttribute('data-starred', 'true');
-                            }
-                            // 在这里添加逻辑来更新页面上的播放列表或其他元素
-                        } else if (response.error) {
-                            alert("操作失败: " + response.error);
-                        }
-                    } catch (e) {
-                        console.error("JSON 解析错误:", e);
-                    }
-                } else if (this.readyState === XMLHttpRequest.DONE) {
-                    console.error("请求错误，状态码:", this.status);
-                }
-            };
-
-            var act = isStarred === 'true' ? "unstar" : "star";
-            xhr.send("video_id=" + encodeURIComponent(video_id) + "&action=" + act);
-        }
-
-
-        function updatePlaylist(video_id, isStarred) {
-            event.preventDefault(); // Prevent default form submission if used within a form
-            xhr.open('POST', 'show_playlist.php', true);
-            xhr.onload = function () {
-                if (xhr.status === 200) {
-                    var response = JSON.parse(xhr.responseText);
-                    if (response.success === 'YES') {
-                        updatePlaylistDisplay(); // Update the playlist display on the page
-                    } else {
-                        alert('Error: ' + (response.error || 'Failed to update the playlist.'));
-                    }
-                } else {
-                    alert('An error occurred while updating the playlist.');
-                }
-            };
-            xhr.send(formData);
-        }
-    </script>
 </head>
 
 <body>
     <section>
+        <!--header-->
         <div class="header">
             <h1>Youtuber GPA</h1>
             <p>My supercool header</p>
         </div>
 
-
         <?php
-
-
         echo "<h1>你好 " . $username . "</h1>";
         echo "<a href='logout.php'>登出</a><br>";
         echo "<a href='change.php'>更改密碼</a><br>";
@@ -182,27 +142,21 @@ $conn = require_once "config.php";
 
         <!-- <form method="post" action="logout.php">
         <input type="submit" value="登出">
-    </form> -->
-
-
+        </form> -->
         <!-- <a href="change.php">更改密码</a> -->
-
-
-
         <!-- 在这里添加搜索表单 -->
         <form action="welcome.php" method="get">
             <input type="text" name="search" placeholder="搜索标题...">
             <input type="submit" value="搜索">
         </form>
 
-
         <?php
         $search = isset($_GET['search']) ? $_GET['search'] : '';
 
-        $sql = "SELECT a.v_id, a.yv_id, thumbnail_link, title ,a.sv_id
-    FROM (SELECT youtube.video_id as v_id, youtube.youtube_video_id as yv_id, thumbnail_link, title, star.video_id as sv_id,ROW_NUMBER() 
-    OVER (PARTITION BY youtube.youtube_video_id) AS rn FROM youtube_trending_videos as youtube
-    LEFT JOIN star ON ( user_id = $user_id AND star.video_id = youtube.video_id)) as a ";
+        $sql = "SELECT a.v_id, a.yv_id, gpa, thumbnail_link, title ,a.sv_id
+        FROM (SELECT youtube.video_id as v_id, youtube.youtube_video_id as yv_id, gpa, thumbnail_link, title, star.video_id as sv_id,ROW_NUMBER() 
+        OVER (PARTITION BY youtube.youtube_video_id) AS rn FROM youtube_trending_videos_gpa as youtube
+        LEFT JOIN star ON ( user_id = $user_id AND star.video_id = youtube.video_id)) as a ";
         if ($search !== '') {
             $sql .= " WHERE title LIKE '%" . $conn->real_escape_string($search) . "%'";
             $sql .= " AND rn = 1 LIMIT 10";
@@ -228,28 +182,12 @@ $conn = require_once "config.php";
                 //star
                 echo "<div class='video' data-video-id='" . $row['v_id'] . "'>"; // Fixed the syntax here
                 echo "<span class='" . (empty($row['sv_id']) ? 'star-btn' : 'star-btn on') . "' 
-            onclick='handleStarClick(this)' 
-            data-starred='" . (empty($row['sv_id']) ? 'false' : 'true') . "'
-            data-video-id='" . htmlspecialchars($row['v_id']) . "'>&#9733;
-            </span>"; //. class # id
-                echo "<style>
-                .star-btn {
-                    cursor: pointer;
-                    color: grey;
-                    font-size: 24px;
-                }
-
-                .star-btn.on { 
-                    color: gold;
-                }
-
-                .star-btn:hover,
-                .star-btn:active {
-                    color: rgb(232, 166, 14);
-                }
-              </style>";
+                    onclick='handleStarClick(this)' 
+                    data-starred='" . (empty($row['sv_id']) ? 'false' : 'true') . "'
+                    data-video-id='" . htmlspecialchars($row['v_id']) . "'>&#9733</span>"; //. class # id
                 echo "</div>"; // Closing div for 'video'
                 echo "<p><a href='" . htmlspecialchars($videoUrl) . "'>" . htmlspecialchars($row['title']) . "</a></p>";
+                echo "<p>" . htmlspecialchars($row['gpa']) . "</p>";
                 echo "</div>";
                 echo "</div>";
             }
@@ -292,43 +230,10 @@ $conn = require_once "config.php";
                         }
                     }
                     ?>
-                    <!-- PHP代碼結束 -->
                 </div>
         </section>
         <!-- End of content from website.html -->
 
-        <script>
-            // This function will be called when the form is submitted
-            function submitComment(event) {
-                event.preventDefault(); // Prevent normal form submission
-
-                var xhr = new XMLHttpRequest();
-                var formData = new FormData(document.getElementById('comment-form'));
-                var username = <?php echo json_encode($username); ?>;
-                xhr.open('POST', 'handle_comment.php', true);
-                xhr.onload = function () {
-                    if (xhr.status === 200) {
-                        var response = JSON.parse(xhr.responseText);
-                        if (response.success) {
-                            var commentsDisplay = document.getElementById('comments-display');
-                            commentsDisplay.innerHTML += '<div><strong>' +
-                                username + '</strong> ' + response.comment + '</div>';
-                            document.getElementById('comment-textarea').value = ''; // Clear the textarea
-                        } else {
-                            alert('Error: ' + response.error);
-                        }
-                    } else {
-                        alert('An error occurred while submitting the comment.');
-                    }
-                };
-                xhr.send(formData);
-            }
-
-            // Function to attach the event listener to the form
-            document.addEventListener('DOMContentLoaded', function () {
-                document.getElementById('comment-form').addEventListener('submit', submitComment);
-            });
-        </script>
         <div class="right-sidebar">
             <h2>Playlist</h2>
             <div id="comments-display">
@@ -366,28 +271,104 @@ $conn = require_once "config.php";
                         echo "<div class='video'>";
                         echo "<img src='" . htmlspecialchars($row['thumbnail_link']) . "' alt='Thumbnail'>";
                         echo "<h3>" . htmlspecialchars($row['title']) . "</h3>";
-                        // 可以添加更多影片的信息，如描述、鏈接等
                         echo "</div>";
                     }
                 } else {
                     echo "沒有找到收藏的影片。";
                 }
                 ?>
-
             </div>
         </div>
-        </div>
-        <style>
-            /* Styling for the main content area */
-            .main-content {
-                flex-grow: 1;
-                background-color: #ababab;
-                padding: 20px;
-                border-radius: 10px;
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-                /* Subtle shadow */
-                /* Additional styles can be added here */
-            }
-        </style>
     </section>
+    <script>//starvideo function
+        function handleStarClick(starElement) {
+            //var title = starElement.getAttribute('data-title');
+            var video_id = starElement.getAttribute('data-video-id');
+            var isStarred = starElement.getAttribute('data-starred');
+            starVideo(video_id, starElement, isStarred);
+        }
+
+        // 保留您现有的 starVideo 和 unstarVideo 函数
+        function starVideo(video_id, starElement, isStarred) {
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "star_video.php", true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.onreadystatechange = function () {
+                if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+                    try {
+                        var response = JSON.parse(this.responseText);
+                        if (response.success === 'YES') {
+                            // 更新星标按钮的样式
+                            if (isStarred === 'true') {
+                                starElement.classList.remove('on');
+                                starElement.setAttribute('data-starred', 'false');
+                            } else {
+                                starElement.classList.add('on');
+                                starElement.setAttribute('data-starred', 'true');
+                            }
+                            // 在这里添加逻辑来更新页面上的播放列表或其他元素
+                        } else if (response.error) {
+                            alert("操作失败: " + response.error);
+                        }
+                    } catch (e) {
+                        console.error("JSON 解析错误:", e);
+                    }
+                } else if (this.readyState === XMLHttpRequest.DONE) {
+                    console.error("请求错误，状态码:", this.status);
+                }
+            };
+
+            var act = isStarred === 'true' ? "unstar" : "star";
+            xhr.send("video_id=" + encodeURIComponent(video_id) + "&action=" + act);
+        }
+        function updatePlaylist(video_id, isStarred) {
+            event.preventDefault(); // Prevent default form submission if used within a form
+            xhr.open('POST', 'show_playlist.php', true);
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    var response = JSON.parse(xhr.responseText);
+                    if (response.success === 'YES') {
+                        updatePlaylistDisplay(); // Update the playlist display on the page
+                    } else {
+                        alert('Error: ' + (response.error || 'Failed to update the playlist.'));
+                    }
+                } else {
+                    alert('An error occurred while updating the playlist.');
+                }
+            };
+            xhr.send(formData);
+        }
+    </script>
+    <script> //comoment function
+        // This function will be called when the form is submitted
+        function submitComment(event) {
+            event.preventDefault(); // Prevent normal form submission
+
+            var xhr = new XMLHttpRequest();
+            var formData = new FormData(document.getElementById('comment-form'));
+            var username = <?php echo json_encode($username); ?>;
+            xhr.open('POST', 'handle_comment.php', true);
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    var response = JSON.parse(xhr.responseText);
+                    if (response.success) {
+                        var commentsDisplay = document.getElementById('comments-display');
+                        commentsDisplay.innerHTML += '<div><strong>' +
+                            username + '</strong> ' + response.comment + '</div>';
+                        document.getElementById('comment-textarea').value = ''; // Clear the textarea
+                    } else {
+                        alert('Error: ' + response.error);
+                    }
+                } else {
+                    alert('An error occurred while submitting the comment.');
+                }
+            };
+            xhr.send(formData);
+        }
+
+        // Function to attach the event listener to the form
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('comment-form').addEventListener('submit', submitComment);
+        });
+    </script>
 </body>

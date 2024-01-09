@@ -1,13 +1,70 @@
+<!DOCTYPE html>
 <html>
+
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<title>會員註冊</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <link rel="icon" type="image/png" href="icon.ico"> <!-- Corrected Favicon Link -->
+    <title>會員註冊</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(to right, #ECE9E6, #F2F2F2);
+            margin: 0;
+        }
+
+        .form-container {
+            border: 1px solid #ddd;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+            background: #fff;
+        }
+
+        input[type=text],
+        input[type=password] {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            border-radius: 15px;
+        }
+
+        input[type=submit],
+        input[type=reset] {
+            background-color: #A6635D;
+            color: white;
+            padding: 14px 20px;
+            margin: 8px 0;
+            border: 1px solid #ccc;
+            border-radius: 15px;
+            cursor: pointer;
+            width: 100%;
+            border-radius: px;
+        }
+
+        input[type=submit]:hover {
+            background-color: #C26F61;
+        }
+
+        input[type=reset]:hover {
+            background-color: #C26F61;
+        }
+
+        h1 {
+            text-align: center;
+        }
+    </style>
     <script>
-        
         function validateForm() {
             var x = document.forms["registerForm"]["password"].value;
             var y = document.forms["registerForm"]["password_check"].value;
-            if(x.length<6){
+            if (x.length < 6) {
                 alert("密碼長度不足");
                 return false;
             }
@@ -17,22 +74,24 @@
             }
         }
     </script>
-    
-    </head>
+</head>
+
 <body>
 
-<h1>註冊頁面</h1>
-<form name="registerForm" method="post" action="register.php" onsubmit="return validateForm()">
-帳  號：
-    <input type="text" name="username"><br/><br/>
-密  碼：
-<input type="password" name="password" id="password"><br/><br/>
-確認密碼：
-    <input type="password" name="password_check" id="password_check"><br/><br/>
-<input type="submit" value="註冊" name="submit">
-<input type="reset" value="重設" name="submit">
-</form>
-
+    <div class="form-container">
+        <h1>註冊頁面</h1>
+        <form name="registerForm" method="post" action="register.php" onsubmit="return validateForm()">
+            帳 號：
+            <input type="text" name="username"><br /><br />
+            密 碼：
+            <input type="password" name="password" id="password"><br /><br />
+            確認密碼：
+            <input type="password" name="password_check" id="password_check"><br /><br />
+            <input type="submit" value="註冊" name="submit">
+            <input type="reset" value="重設" name="submit">
+        </form>
+    </div>
 
 </body>
+
 </html>
