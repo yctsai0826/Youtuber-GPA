@@ -11,6 +11,7 @@ $conn = require_once "config.php";
 <head>
     <meta charset="UTF-8">
     <title>影片列表</title>
+    <link rel="icon" type="image/ico" href="loopy.ico">
     <style>
         body {
             /*color <body>*/
@@ -22,10 +23,12 @@ $conn = require_once "config.php";
         h1 {
             color: #0066cc;
         }
-    </style>
-    <style>
+
+
         .header {
-            z-index: 10;
+            grid-column: 2 / 4;
+            grid-row: 1;
+            /*z-index: 10;*/
             padding: 20px;
             text-align: center;
             background: #1abc9c;
@@ -76,21 +79,41 @@ $conn = require_once "config.php";
             /* 字体加粗 */
         }
 
+        .star-btn {
+            cursor: pointer;
+            color: grey;
+            font-size: 24px;
+        }
+
+        .star-btn.on {
+            color: gold;
+        }
+
+        .star-btn:hover,
+        .star-btn:active {
+            color: rgb(232, 166, 14);
+        }
+
         .right-sidebar {
-            position: absolute;
-            top: 35%;
+            position: fixed;
+            top: 50%;
             right: 0;
             z-index: 5;
             width: 200px;
-            /* Fixed width for the sidebar */
-            background-color: #f9f9f9;
-            /* Light gray background */
+            background-color: #C4E1DD;
             padding: 20px;
-            /* Padding inside the sidebar */
             border-radius: 10px;
-            /* Rounded corners */
             border: 1px solid #ccc;
             box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+            transform: translateY(-50%);
+        }
+
+        .main-content {
+            flex-grow: 1;
+            background-color: #ababab;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
         /* 响应式设计 */
@@ -100,87 +123,210 @@ $conn = require_once "config.php";
                 /* 小屏幕时只有一列 */
             }
         }
-
-        .text {
-            background-color: #aaa;
-            padding: 16px;
-            border-radius: 10px;
-            position: relative;
-        }
-
-        .comment {
-            background-color: solid transparent; /* 設置背景顏色 */
-            border: 1px solid transparent; /* 添加邊框 */
-            border-radius: 5px; /* 輕微圓角 */
-            padding: 10px; /* 內邊距 */
-            margin-bottom: 10px; /* 底部外邊距 */
-            max-width: 500px; /* 最大寬度 */
-            margin-left: 20px; /* 或者您希望的任何具体数值 */
-        }
-
-        .comment p {
-            margin: 5px 0; /* 段落間距 */
-            line-height: 1.5; /* 行高 */
-            color: #333; /* 文本顏色 */
-        }
-
-        .comment strong {
-            color: #0066cc; /* 用戶名顏色 */
-            display: block; /* 塊級元素 */
-            margin-bottom: 5px; /* 與文本間的距離 */
-        }
-
-        .comment span {
-            font-size: 0.9em; /* 發送時間的字體大小 */
-            color: #777; /* 發送時間的顏色 */
-        }
-
-        .local {
-            .text {
-                z-index: 2;
-                margin-left: 20px;
-                margin-right: 80px;
-                color: #eee;
-                background-color: #fff;
-                &::before {
-                border-right: 10px solid #fff;
-                left: -10px;
-                }
-            }
-        }
-        
-
-        .local .text::before {
-            content: "";
-            position: absolute;
-            top: 30px;
-            left: -30px; /* 可能需要调整以适应阴影的扩散 */
-            border-top: 10px solid transparent;
-            border-bottom: 30px solid transparent;
-            border-right: 30px solid #fff; /* 颜色应该与 .text 的背景色相匹配 */
-            transform: translateY(-50%);
-            z-index: 1;
-            /* 添加 drop-shadow 阴影效果 */
-            /* filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); */
-        }
-
-
-        .local .text {
-            z-index: 3;
-            font-weight: 300;
-            box-shadow: 0 0 10px #888;
-            /* 其他样式 */
-        }
-
-
-
-
-
-
-
-
     </style>
-    <script>
+</head>
+
+<body>
+    <section>
+        <!--header-->
+        <div class="header">
+            <h1>Youtuber GPA</h1>
+            <p>My supercool header</p>
+        </div>
+
+        <?php
+        echo "<h1>你好 " . $username . "</h1>";
+        echo "<a href='logout.php'>登出</a><br>";
+        echo "<a href='change.php'>更改密碼</a><br>";
+        ?>
+
+        <!-- <form method="post" action="logout.php">
+        <input type="submit" value="登出">
+        </form> -->
+        <!-- <a href="change.php">更改密码</a> -->
+        <!-- 在这里添加搜索表单 -->
+        <form action="welcome.php" method="get">
+            <input type="text" name="search" placeholder="搜索标题...">
+            <input type="submit" value="搜索">
+        </form>
+
+        <?php
+        $search = isset($_GET['search']) ? $_GET['search'] : '';
+
+        $sql = "SELECT a.v_id, a.yv_id, thumbnail_link, title ,a.sv_id
+    FROM (SELECT youtube.video_id as v_id, youtube.youtube_video_id as yv_id, thumbnail_link, title, star.video_id as sv_id,ROW_NUMBER() 
+    OVER (PARTITION BY youtube.youtube_video_id) AS rn FROM youtube_trending_videos as youtube
+    LEFT JOIN star ON ( user_id = $user_id AND star.video_id = youtube.video_id)) as a ";
+        if ($search !== '') {
+            $sql .= " WHERE title LIKE '%" . $conn->real_escape_string($search) . "%'";
+            $sql .= " AND rn = 1 LIMIT 10";
+        } else {
+            $sql .= " WHERE rn = 1 LIMIT 10";
+        }
+
+        // $sql = "SELECT video_id, thumbnail_link, title FROM youtube_trending_videos LIMIT 5";
+        error_log($sql);
+
+        $result = mysqli_query($conn, $sql);
+
+        // 检查查询结果
+        if ($result && $result->num_rows > 0) {
+            echo "<div class='youtube-videos'>";
+            // 输出每个视频的信息
+            while ($row = $result->fetch_assoc()) {
+                //error_log(var_dump($row, true));
+                $videoUrl = "https://www.youtube.com/watch?v=" . $row['yv_id'];
+                echo "<div class='youtube-video'>";
+                echo "<div class='thumbnail'>";
+                echo "<img src='" . htmlspecialchars($row['thumbnail_link']) . "' alt='Thumbnail'>";
+                echo "</div>";
+                echo "<div class='video-info'>";
+                //star
+                echo "<div class='video' data-video-id='" . $row['v_id'] . "'>"; // Fixed the syntax here
+                echo "<span class='" . (empty($row['sv_id']) ? 'star-btn' : 'star-btn on') . "' 
+                    onclick='handleStarClick(this)' 
+                    data-starred='" . (empty($row['sv_id']) ? 'false' : 'true') . "'
+                    data-video-id='" . htmlspecialchars($row['v_id']) . "'>&#9733</span>"; //. class # id
+                echo "</div>"; // Closing div for 'video'
+                echo "<p><a href='" . htmlspecialchars($videoUrl) . "'>" . htmlspecialchars($row['title']) . "</a></p>";
+                echo "<p>" . htmlspecialchars($row['gpa']) . "</p>";
+                echo "</div>";
+                echo "</div>";
+            }
+            echo "</div>";
+        } else {
+            echo "<p>没有找到视频。</p>";
+        }
+
+
+        ?>
+
+        <section id="blog">
+            <h2>Blog</h2>
+            <article>
+                <form id="comment-form">
+                    <textarea id="comment-textarea" name="comment" placeholder="Enter comment..."></textarea>
+                    <button type="submit">Submit Comment</button>
+                </form>
+                <script>
+                // This function will be called when the form is submitted
+                function submitComment(event) {
+                    event.preventDefault(); // 防止表單的默認提交行為
+
+                    var xhr = new XMLHttpRequest();
+                    var formData = new FormData(document.getElementById('comment-form'));
+                    xhr.open('POST', 'handle_comment.php', true);
+                    xhr.onload = function() {
+                        if (xhr.status === 200) {
+                            var response = JSON.parse(xhr.responseText);
+                            if (response.success) {
+                                var commentsDisplay = document.getElementById('comments-display');
+                                // 獲取當前時間並格式化為 ISO 8601 字符串
+                                var now = new Date();
+                                var year = now.getFullYear();
+                                var month = ('0' + (now.getMonth() + 1)).slice(-2);
+                                var day = ('0' + now.getDate()).slice(-2);
+                                var hours = ('0' + now.getHours()).slice(-2);
+                                var minutes = ('0' + now.getMinutes()).slice(-2);
+                                var seconds = ('0' + now.getSeconds()).slice(-2);
+                                var timeString = year + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':' + seconds;
+                                // 創建顯示留言和時間的HTML
+                                var newCommentHTML = '<div><strong>' + 'test' + '</strong> ' + timeString + '<br>' +'<br>' + response.comment + '</div>';
+                                // 將新留言插入到留言顯示區域的開始位置
+                                commentsDisplay.insertAdjacentHTML('afterbegin', newCommentHTML);
+                                document.getElementById('comment-textarea').value = ''; // 清空文本區域
+                            } else {
+                                alert('Error: ' + response.error);
+                            }
+                        } else {
+                            alert('An error occurred while submitting the comment.');
+                        }
+                    };
+                    xhr.send(formData);
+                }
+
+
+
+                // Function to attach the event listener to the form
+                    document.addEventListener('DOMContentLoaded', function() {
+                        document.getElementById('comment-form').addEventListener('submit', submitComment);
+                    });
+                </script>
+                <div id="comments-display">
+                    <?php
+                    // 連接到數據庫
+                    // $conn = require_once "config.php";
+                    
+                    // 檢查連接
+                    if ($conn->connect_error) {
+                        die("Connection failed: " . $conn->connect_error);
+                    }
+
+                    // 從數據庫獲取評論
+                    $sql = "SELECT nickname, content, created_at FROM comments ORDER BY created_at DESC";
+                    $result = $conn->query($sql);
+
+                    if ($result && $result->num_rows > 0) {
+                        // 輸出評論
+                        while ($row = $result->fetch_assoc()) {
+                            echo "<div class='comment'>";
+                            echo "<p><strong>" . htmlspecialchars($row['nickname']) . "</strong> <span>" . htmlspecialchars($row['created_at']) . "</span></p>";
+                            echo "<p>" . htmlspecialchars($row['content']) . "</p>";
+                            echo "</div>";
+                        }
+                    }
+                    ?>
+                </div>
+        </section>
+        <!-- End of content from website.html -->
+
+        <div class="right-sidebar">
+            <h2>Playlist</h2>
+            <div id="comments-display">
+                <?php
+                // 連接到數據庫
+                // 確保已經包含了數據庫連接代碼
+                // 例如: $conn = new mysqli('主機', '用戶名', '密碼', '數據庫名');
+                
+                // 檢查連接
+                if ($conn->connect_error) {
+                    die("連接失敗: " . $conn->connect_error);
+                }
+
+                // 假設 $user_id 包含當前用戶的 ID
+                $user_id = $_SESSION["user_id"];
+
+                // 準備 SQL 查詢來選擇所有被該用戶標記的影片
+                // 注意: 這裡我假設 'youtube_video_id' 是正確的欄位名
+                $sql = "SELECT DISTINCT youtube.video_id, youtube.title, youtube.thumbnail_link 
+                        FROM youtube_trending_videos AS youtube 
+                        INNER JOIN star ON youtube.video_id = star.video_id 
+                        WHERE star.user_id = ?";
+                // 預處理和綁定
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param("i", $user_id);
+
+                // 執行語句並獲取結果
+                $stmt->execute();
+                $result = $stmt->get_result();
+
+                // 檢查是否有結果
+                if ($result->num_rows > 0) {
+                    // 輸出每個影片的信息
+                    while ($row = $result->fetch_assoc()) {
+                        echo "<div class='video'>";
+                        echo "<img src='" . htmlspecialchars($row['thumbnail_link']) . "' alt='Thumbnail'>";
+                        echo "<h3>" . htmlspecialchars($row['title']) . "</h3>";
+                        echo "</div>";
+                    }
+                } else {
+                    echo "沒有找到收藏的影片。";
+                }
+                ?>
+            </div>
+        </div>
+    </section>
+    <script>//starvideo function
         function handleStarClick(starElement) {
             //var title = starElement.getAttribute('data-title');
             var video_id = starElement.getAttribute('data-video-id');
@@ -221,8 +367,6 @@ $conn = require_once "config.php";
             var act = isStarred === 'true' ? "unstar" : "star";
             xhr.send("video_id=" + encodeURIComponent(video_id) + "&action=" + act);
         }
-
-
         function updatePlaylist(video_id, isStarred) {
             event.preventDefault(); // Prevent default form submission if used within a form
             xhr.open('POST', 'show_playlist.php', true);
@@ -241,234 +385,4 @@ $conn = require_once "config.php";
             xhr.send(formData);
         }
     </script>
-</head>
-
-<body>
-    <section>
-        <div class="header">
-            <h1>Youtuber GPA</h1>
-            <p>My supercool header</p>
-        </div>
-
-
-        <?php
-
-
-        echo "<h1>你好 " . $username . "</h1>";
-        echo "<a href='logout.php'>登出</a><br>";
-        echo "<a href='change.php'>更改密碼</a><br>";
-        ?>
-
-        <!-- <form method="post" action="logout.php">
-        <input type="submit" value="登出">
-    </form> -->
-
-
-        <!-- <a href="change.php">更改密码</a> -->
-
-
-
-        <!-- 在这里添加搜索表单 -->
-        <form action="welcome.php" method="get">
-            <input type="text" name="search" placeholder="搜索标题...">
-            <input type="submit" value="搜索">
-        </form>
-
-
-        <?php
-        $search = isset($_GET['search']) ? $_GET['search'] : '';
-
-        $sql = "SELECT a.v_id, a.yv_id, thumbnail_link, title ,a.sv_id
-    FROM (SELECT youtube.video_id as v_id, youtube.youtube_video_id as yv_id, thumbnail_link, title, star.video_id as sv_id,ROW_NUMBER() 
-    OVER (PARTITION BY youtube.youtube_video_id) AS rn FROM youtube_trending_videos as youtube
-    LEFT JOIN star ON ( user_id = $user_id AND star.video_id = youtube.video_id)) as a ";
-        if ($search !== '') {
-            $sql .= " WHERE title LIKE '%" . $conn->real_escape_string($search) . "%'";
-            $sql .= " AND rn = 1 LIMIT 10";
-        } else {
-            $sql .= " WHERE rn = 1 LIMIT 10";
-        }
-        // $sql = "SELECT video_id, thumbnail_link, title FROM youtube_trending_videos LIMIT 5";
-        error_log($sql);
-        $result = $conn->query($sql);
-
-        // 检查查询结果
-        if ($result && $result->num_rows > 0) {
-            echo "<div class='youtube-videos'>";
-            // 输出每个视频的信息
-            while ($row = $result->fetch_assoc()) {
-                //error_log(var_dump($row, true));
-                $videoUrl = "https://www.youtube.com/watch?v=" . $row['yv_id'];
-                echo "<div class='youtube-video'>";
-                echo "<div class='thumbnail'>";
-                echo "<img src='" . htmlspecialchars($row['thumbnail_link']) . "' alt='Thumbnail'>";
-                echo "</div>";
-                echo "<div class='video-info'>";
-                //star
-                echo "<div class='video' data-video-id='" . $row['v_id'] . "'>"; // Fixed the syntax here
-                echo "<span class='" . (empty($row['sv_id']) ? 'star-btn' : 'star-btn on') . "' 
-            onclick='handleStarClick(this)' 
-            data-starred='" . (empty($row['sv_id']) ? 'false' : 'true') . "'
-            data-video-id='" . htmlspecialchars($row['v_id']) . "'>&#9733;
-            </span>"; //. class # id
-                echo "<style>
-                .star-btn {
-                    cursor: pointer;
-                    color: grey;
-                    font-size: 24px;
-                }
-
-                .star-btn.on { 
-                    color: gold;
-                }
-
-                .star-btn:hover,
-                .star-btn:active {
-                    color: rgb(232, 166, 14);
-                }
-              </style>";
-                echo "</div>"; // Closing div for 'video'
-                echo "<p><a href='" . htmlspecialchars($videoUrl) . "'>" . htmlspecialchars($row['title']) . "</a></p>";
-                echo "</div>";
-                echo "</div>";
-            }
-            echo "</div>";
-        } else {
-            echo "<p>没有找到视频。</p>";
-        }
-
-
-
-        ?>
-
-        <section id="blog">
-            <h2>Blog</h2>
-            <article>
-                <form id="comment-form">
-                    <textarea id="comment-textarea" name="comment" placeholder="Enter comment..."></textarea>
-                    <button type="submit">Submit Comment</button>
-                </form>
-                <div id="comments-display">
-                    <?php
-                    // 連接到數據庫
-                    // $conn = require_once "config.php";
-                    
-                    // 檢查連接
-                    if ($conn->connect_error) {
-                        die("Connection failed: " . $conn->connect_error);
-                    }
-
-                    // 從數據庫獲取評論
-                    $sql = "SELECT nickname, content, created_at FROM comments ORDER BY created_at DESC";
-                    $result = $conn->query($sql);
-
-                    if ($result && $result->num_rows > 0) {
-                        // 輸出評論
-                        while ($row = $result->fetch_assoc()) {
-                            echo "<div class='comment'>";
-                            echo "<p><strong>" . htmlspecialchars($row['nickname']) . "</strong> <span>" . htmlspecialchars($row['created_at']) . "</span></p>";
-                            echo "<p>" . htmlspecialchars($row['content']) . "</p>";
-                            echo "</div>";
-                        }
-                    }
-                    ?>
-                    <!-- PHP代碼結束 -->
-                </div>
-        </section>
-        <!-- End of content from website.html -->
-
-        <script>
-            // This function will be called when the form is submitted
-            function submitComment(event) {
-                event.preventDefault(); // Prevent normal form submission
-
-                var xhr = new XMLHttpRequest();
-                var formData = new FormData(document.getElementById('comment-form'));
-                var username = <?php echo json_encode($username); ?>;
-                xhr.open('POST', 'handle_comment.php', true);
-                xhr.onload = function () {
-                    if (xhr.status === 200) {
-                        var response = JSON.parse(xhr.responseText);
-                        if (response.success) {
-                            var commentsDisplay = document.getElementById('comments-display');
-                            commentsDisplay.innerHTML += '<div><strong>' +
-                                username + '</strong> ' + response.comment + '</div>';
-                            document.getElementById('comment-textarea').value = ''; // Clear the textarea
-                        } else {
-                            alert('Error: ' + response.error);
-                        }
-                    } else {
-                        alert('An error occurred while submitting the comment.');
-                    }
-                };
-                xhr.send(formData);
-            }
-
-            // Function to attach the event listener to the form
-            document.addEventListener('DOMContentLoaded', function () {
-                document.getElementById('comment-form').addEventListener('submit', submitComment);
-            });
-        </script>
-
-        <div class="right-sidebar">
-            <h2>Playlist</h2>
-            <div id="playlist-display">
-                <?php
-                // 連接到數據庫
-                // 確保已經包含了數據庫連接代碼
-                // 例如: $conn = new mysqli('主機', '用戶名', '密碼', '數據庫名');
-                
-                // 檢查連接
-                if ($conn->connect_error) {
-                    die("連接失敗: " . $conn->connect_error);
-                }
-
-                // 假設 $user_id 包含當前用戶的 ID
-                $user_id = $_SESSION["user_id"];
-
-                // 準備 SQL 查詢來選擇所有被該用戶標記的影片
-                // 注意: 這裡我假設 'youtube_video_id' 是正確的欄位名
-                $sql = "SELECT DISTINCT youtube.video_id, youtube.title, youtube.thumbnail_link 
-                        FROM youtube_trending_videos AS youtube 
-                        INNER JOIN star ON youtube.video_id = star.video_id 
-                        WHERE star.user_id = ?";
-                // 預處理和綁定
-                $stmt = $conn->prepare($sql);
-                $stmt->bind_param("i", $user_id);
-
-                // 執行語句並獲取結果
-                $stmt->execute();
-                $result = $stmt->get_result();
-
-                // 檢查是否有結果
-                if ($result->num_rows > 0) {
-                    // 輸出每個影片的信息
-                    while ($row = $result->fetch_assoc()) {
-                        echo "<div class='video'>";
-                        echo "<img src='" . htmlspecialchars($row['thumbnail_link']) . "' alt='Thumbnail'>";
-                        echo "<h3>" . htmlspecialchars($row['title']) . "</h3>";
-                        // 可以添加更多影片的信息，如描述、鏈接等
-                        echo "</div>";
-                    }
-                } else {
-                    echo "沒有找到收藏的影片。";
-                }
-                ?>
-
-            </div>
-        </div>
-        </div>
-        <style>
-            /* Styling for the main content area */
-            .main-content {
-                flex-grow: 1;
-                background-color: #ababab;
-                padding: 20px;
-                border-radius: 10px;
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-                /* Subtle shadow */
-                /* Additional styles can be added here */
-            }
-        </style>
-    </section>
 </body>
