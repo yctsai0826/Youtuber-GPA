@@ -145,23 +145,51 @@ $conn = require_once "config.php";
         </form> -->
         <!-- <a href="change.php">更改密码</a> -->
         <!-- 在这里添加搜索表单 -->
-        <form action="welcome.php" method="get">
-            <input type="text" name="search" placeholder="搜索标题...">
+        <form action="" method="get">
+            <input type="text" name="search" placeholder="搜索视频">
+            <select name="region">
+                <option value="UK">英国</option>
+                <option value="US" selected>美国</option>
+                <option value="KR">韩国</option>
+                <option value="JP">日本</option>
+            </select>
             <input type="submit" value="搜索">
         </form>
 
         <?php
         $search = isset($_GET['search']) ? $_GET['search'] : '';
+        $region = isset($_GET['region']) ? $_GET['region'] : 'US'; // 默认为美国
 
-        $sql = "SELECT a.v_id, a.yv_id, thumbnail_link, title ,a.sv_id
-    FROM (SELECT youtube.video_id as v_id, youtube.youtube_video_id as yv_id, thumbnail_link, title, star.video_id as sv_id,ROW_NUMBER() 
-    OVER (PARTITION BY youtube.youtube_video_id) AS rn FROM youtube_trending_videos as youtube
-    LEFT JOIN star ON ( user_id = $user_id AND star.video_id = youtube.video_id)) as a ";
+        // 根据区域选择相应的表
+        $tableName = '';
+        switch ($region) {
+            case 'UK':
+                $tableName = 'BR_gpa';
+                break;
+            case 'US':
+                $tableName = 'US_gpa';
+                break;
+            case 'KR':
+                $tableName = 'KR_gpa';
+                break;
+            case 'JP':
+                $tableName = 'JP_gpa';
+                break;
+            default:
+                $tableName = 'US_gpa'; // 如果没有匹配的区域，默认为 US_gpa
+                break;
+        }
+
+
+        $sql = "SELECT a.v_id, a.yv_id, gpa, thumbnail_link, title ,a.sv_id
+        FROM (SELECT youtube.video_id as v_id, youtube.youtube_video_id as yv_id, gpa, thumbnail_link, title, star.video_id as sv_id,ROW_NUMBER() 
+        OVER (PARTITION BY youtube.youtube_video_id) AS rn FROM $tableName as youtube
+        LEFT JOIN star ON ( user_id = $user_id AND star.video_id = youtube.video_id)) as a ";
         if ($search !== '') {
             $sql .= " WHERE title LIKE '%" . $conn->real_escape_string($search) . "%'";
-            $sql .= " AND rn = 1 LIMIT 10";
+            $sql .= " AND rn = 1 ORDER BY gpa DESC LIMIT 10";
         } else {
-            $sql .= " WHERE rn = 1 LIMIT 10";
+            $sql .= " WHERE rn = 1 ORDER BY gpa DESC LIMIT 10";
         }
 
         // $sql = "SELECT video_id, thumbnail_link, title FROM youtube_trending_videos LIMIT 5";
