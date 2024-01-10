@@ -51,7 +51,7 @@ if (isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true) {
             padding: 15px;
             border-radius: 15px;
             border: none;
-            background-color: #A6635D;
+            background-color: #245C73;
             color: white;
             font-size: 16px;
             cursor: pointer;
@@ -59,12 +59,12 @@ if (isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true) {
         }
 
         input[type=submit]:hover {
-            background-color: #C26F61;
+            background-color: #144D75;
         }
 
         a {
             text-decoration: none;
-            color: #C26F61;
+            color: #245C73;
             display: block;
             margin-top: 20px;
         }

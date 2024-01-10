@@ -15,13 +15,13 @@ $conn = require_once "config.php";
     <style>
         body {
             /*color <body>*/
-            font-family: Arial, sans-serif;
+            font-family: Georgia, sans-serif;
             background-color: #f0f0f0;
             color: #477238;
         }
 
         h1 {
-            color: #0066cc;
+            color: #ffffff;
         }
 
 
@@ -29,11 +29,38 @@ $conn = require_once "config.php";
             grid-column: 2 / 4;
             grid-row: 1;
             /*z-index: 10;*/
-            padding: 20px;
+            padding: 30px;
             text-align: center;
-            background: #1abc9c;
+            background-image: url('header.gif');
+            /* Path to your GIF file */
             color: white;
             font-size: 30px;
+        }
+
+        .top-right {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 20px;
+            position: absolute;
+            top: 0;
+            right: 0;
+        }
+
+        .top-right a,
+        .top-right h1 {
+            margin-left: 20px;
+            color: #ffffff;
+            text-decoration: none;
+        }
+
+        .search-video {
+            text-align: center;
+            background: #fff;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin: auto;
         }
 
         .youtube-videos {
@@ -100,12 +127,20 @@ $conn = require_once "config.php";
             right: 0;
             z-index: 5;
             width: 200px;
-            background-color: #C4E1DD;
+            background-color: #082A40;
             padding: 20px;
             border-radius: 10px;
             border: 1px solid #ccc;
             box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
             transform: translateY(-50%);
+        }
+
+        .right-sidebar h2 {
+            color: #FFF6ED;
+        }
+
+        .right-sidebar p {
+            color: #FFF6ED;
         }
 
         .main-content {
@@ -134,32 +169,35 @@ $conn = require_once "config.php";
             <p>My supercool header</p>
         </div>
 
-        <?php
-        echo "<h1>你好 " . $username . "</h1>";
-        echo "<a href='logout.php'>登出</a><br>";
-        echo "<a href='change.php'>更改密碼</a><br>";
-        ?>
-
+        <div class="top-right">
+            <h1>你好
+                <?php echo htmlspecialchars($_SESSION["username"]); ?>
+            </h1>
+            <a href='logout.php'>登出</a>
+            <a href='change.php'>更改密碼</a>
+        </div>
         <!-- <form method="post" action="logout.php">
         <input type="submit" value="登出">
         </form> -->
         <!-- <a href="change.php">更改密码</a> -->
         <!-- 在这里添加搜索表单 -->
-        <form action="" method="get">
-            <input type="text" name="search" placeholder="搜索视频">
-            <select name="region">
-                <option value="UK">英国</option>
-                <option value="US" selected>美国</option>
-                <option value="KR">韩国</option>
-                <option value="JP">日本</option>
-            </select>
-            <input type="submit" value="搜索">
-        </form>
+        <div class="search-video">
+            <form action="" method="get">
+                <input type="text" name="search" placeholder="找影片">
+                <select name="region">
+                    <option value="UK">英国</option>
+                    <option value="US" selected>美国</option>
+                    <option value="KR">韩国</option>
+                    <option value="JP">日本</option>
+                </select>
+                <input type="submit" value="搜索">
+            </form>
+        </div>
 
         <?php
         $search = isset($_GET['search']) ? $_GET['search'] : '';
         $region = isset($_GET['region']) ? $_GET['region'] : 'US'; // 默认为美国
-
+        
         // 根据区域选择相应的表
         $tableName = '';
         switch ($region) {
@@ -266,7 +304,8 @@ $conn = require_once "config.php";
                         var xhr = new XMLHttpRequest();
                         var formData = new FormData(document.getElementById('comment-form'));
                         xhr.open('POST', 'handle_comment.php', true);
-                        xhr.onload = function() {
+
+                        xhr.onload = function () {
                             if (xhr.status === 200) {
                                 var response = JSON.parse(xhr.responseText);
                                 if (response.success) {
@@ -298,7 +337,9 @@ $conn = require_once "config.php";
 
 
                     // Function to attach the event listener to the form
-                    document.addEventListener('DOMContentLoaded', function() {
+
+                    document.addEventListener('DOMContentLoaded', function () {
+
                         document.getElementById('comment-form').addEventListener('submit', submitComment);
                     });
                 </script>
@@ -388,7 +429,9 @@ $conn = require_once "config.php";
                         echo "</div>";
                     }
                 } else {
-                    echo "沒有找到收藏的影片。";
+                    echo "<div class = 'playlist'>";
+                    echo "<p>沒有找到收藏的影片。</p>";
+                    echo "</div>";
                 }
                 ?>
             </div>
@@ -434,13 +477,13 @@ $conn = require_once "config.php";
                             }
                             // 在这里添加逻辑来更新页面上的播放列表或其他元素
                         } else if (response.error) {
-                            alert("操作失败: " + response.error);
+                            alert("操作失敗: " + response.error);
                         }
                     } catch (e) {
-                        console.error("JSON 解析错误:", e);
+                        console.error("JSON 解析錯誤:", e);
                     }
                 } else if (this.readyState === XMLHttpRequest.DONE) {
-                    console.error("请求错误，状态码:", this.status);
+                    console.error("請求錯誤，狀態碼:", this.status);
                 }
             };
 
