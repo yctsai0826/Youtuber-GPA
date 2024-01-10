@@ -219,20 +219,19 @@ $conn = require_once "config.php";
         }
 
 
-        $sql = "SELECT a.v_id, a.yv_id, gpa, thumbnail_link, title ,a.sv_id
-        FROM (SELECT youtube.video_id as v_id, youtube.youtube_video_id as yv_id, gpa, thumbnail_link, title, star.video_id as sv_id,ROW_NUMBER() 
-        OVER (PARTITION BY youtube.youtube_video_id) AS rn FROM $tableName as youtube
-        LEFT JOIN star ON ( user_id = $user_id AND star.video_id = youtube.video_id)) as a ";
+        $sql = "SELECT a.v_id, a.yv_id, gpa, thumbnail_link, title ,a.syv_id
+        FROM (SELECT youtube.video_id as v_id, youtube.youtube_video_id as yv_id, gpa, thumbnail_link, title, star.youtube_video_id as syv_id
+        FROM $tableName as youtube
+        LEFT JOIN star ON ( user_id = $user_id AND star.youtube_video_id = youtube.youtube_video_id)) as a ";
         if ($search !== '') {
             $sql .= " WHERE title LIKE '%" . $conn->real_escape_string($search) . "%'";
-            $sql .= " AND rn = 1 ORDER BY gpa DESC LIMIT 10";
+            $sql .= " ORDER BY gpa DESC LIMIT 10;";
         } else {
-            $sql .= " WHERE rn = 1 ORDER BY gpa DESC LIMIT 10";
+            $sql .= "ORDER BY gpa DESC LIMIT 10;";
         }
 
-        // $sql = "SELECT video_id, thumbnail_link, title FROM youtube_trending_videos LIMIT 5";
         error_log($sql);
-
+        echo $sql;
         $result = mysqli_query($conn, $sql);
 
         // 检查查询结果
@@ -248,11 +247,11 @@ $conn = require_once "config.php";
                 echo "</div>";
                 echo "<div class='video-info'>";
                 //star
-                echo "<div class='video' data-video-id='" . $row['v_id'] . "'>"; // Fixed the syntax here
-                echo "<span class='" . (empty($row['sv_id']) ? 'star-btn' : 'star-btn on') . "' 
+                echo "<div class='video' data-youtube-video-id='" . $row['yv_id'] . "'>"; // Fixed the syntax here
+                echo "<span class='" . (empty($row['syv_id']) ? 'star-btn' : 'star-btn on') . "' 
                     onclick='handleStarClick(this)' 
-                    data-starred='" . (empty($row['sv_id']) ? 'false' : 'true') . "'
-                    data-video-id='" . htmlspecialchars($row['v_id']) . "'>&#9733</span>"; //. class # id
+                    data-starred='" . (empty($row['syv_id']) ? 'false' : 'true') . "'
+                    data-youtube-video-id='" . htmlspecialchars($row['yv_id']) . "'>&#9733</span>"; //. class # id
                 echo "</div>"; // Closing div for 'video'
                 echo "<p><a href='" . htmlspecialchars($videoUrl) . "'>" . htmlspecialchars($row['title']) . "</a></p>";
                 echo "<p>" . htmlspecialchars($row['gpa']) . "</p>";
@@ -267,8 +266,31 @@ $conn = require_once "config.php";
 
         ?>
 
-        <section id="blog">
-            <h2>Blog</h2>
+        <?php
+        // 假设 'config.php' 包含数据库连接信息
+        // $conn = require_once "config.php";
+
+        $commentsPerPage = 5; // 每页显示的评论数
+        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1; // 当前页码
+        $offset = ($page - 1) * $commentsPerPage; // 计算当前页的第一条评论的索引
+
+        // 查询总评论数
+        $totalCommentsQuery = "SELECT COUNT(*) AS total FROM comments";
+        $totalResult = $conn->query($totalCommentsQuery);
+        $totalRow = $totalResult->fetch_assoc();
+        $totalComments = $totalRow['total'];
+        $totalPages = ceil($totalComments / $commentsPerPage); // 总页数
+
+        // 查询当前页的评论
+        $sql = "SELECT nickname, content, created_at FROM comments ORDER BY created_at DESC LIMIT $offset, $commentsPerPage";
+        $result = $conn->query($sql);
+        ?>
+
+
+
+
+        <section id="Comment">
+            <h2>Comment</h2>
             <article>
                 <form id="comment-form">
                     <textarea id="comment-textarea" name="comment" placeholder="Enter comment..."></textarea>
@@ -282,6 +304,7 @@ $conn = require_once "config.php";
                         var xhr = new XMLHttpRequest();
                         var formData = new FormData(document.getElementById('comment-form'));
                         xhr.open('POST', 'handle_comment.php', true);
+
                         xhr.onload = function () {
                             if (xhr.status === 200) {
                                 var response = JSON.parse(xhr.responseText);
@@ -314,41 +337,77 @@ $conn = require_once "config.php";
 
 
                     // Function to attach the event listener to the form
+
                     document.addEventListener('DOMContentLoaded', function () {
+
                         document.getElementById('comment-form').addEventListener('submit', submitComment);
                     });
                 </script>
                 <div id="comments-display">
                     <?php
-                    // 連接到數據庫
-                    // $conn = require_once "config.php";
-                    
-                    // 檢查連接
-                    if ($conn->connect_error) {
-                        die("Connection failed: " . $conn->connect_error);
-                    }
-
-                    // 從數據庫獲取評論
-                    $sql = "SELECT nickname, content, created_at FROM comments ORDER BY created_at DESC";
-                    $result = $conn->query($sql);
-
                     if ($result && $result->num_rows > 0) {
-                        // 輸出評論
+                        // 输出评论
                         while ($row = $result->fetch_assoc()) {
                             echo "<div class='comment'>";
                             echo "<p><strong>" . htmlspecialchars($row['nickname']) . "</strong> <span>" . htmlspecialchars($row['created_at']) . "</span></p>";
                             echo "<p>" . htmlspecialchars($row['content']) . "</p>";
                             echo "</div>";
                         }
+                    } else {
+                        echo "<p>No comments yet.</p>";
+                    }
+                    ?>
+                </div>
+
+                <div id="pagination">
+                    <?php
+                    for ($i = 1; $i <= $totalPages; $i++) {
+                        if ($i == $page) {
+                            echo "<span>$i </span>";
+                        } else {
+                            echo "<a href='?page=$i'>$i</a> ";
+                        }
                     }
                     ?>
                 </div>
         </section>
         <!-- End of content from website.html -->
+        <?php
+        // 确保已经包含了数据库连接代码
+        // 例如: $conn = new mysqli('主机', '用户名', '密码', '数据库名');
+
+        $videosPerPage = 4; // 每页显示的影片数
+        $videoPage = isset($_GET['videoPage']) ? (int)$_GET['videoPage'] : 1; // 当前视频页码
+        $offset = ($videoPage - 1) * $videosPerPage; // 计算当前页的第一部影片的索引
+
+        // 假设 $user_id 包含当前用户的 ID
+        $user_id = $_SESSION["user_id"];
+
+        // 查询总影片数
+        $totalVideosQuery = "SELECT COUNT(*) AS total FROM star WHERE user_id = ?";
+        $totalStmt = $conn->prepare($totalVideosQuery);
+        $totalStmt->bind_param("i", $user_id);
+        $totalStmt->execute();
+        $totalResult = $totalStmt->get_result();
+        $totalRow = $totalResult->fetch_assoc();
+        $totalVideos = $totalRow['total'];
+        $totalPages = ceil($totalVideos / $videosPerPage); // 总页数
+
+        // 查询当前页的影片
+        $sql = "SELECT DISTINCT youtube.youtube_video_id, youtube.title, youtube.thumbnail_link 
+        FROM total_youtube_videos AS youtube 
+        INNER JOIN star ON youtube.youtube_video_id = star.youtube_video_id 
+        WHERE star.user_id = ? 
+        LIMIT ?, ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("iii", $user_id, $offset, $videosPerPage);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        ?>
 
         <div class="right-sidebar">
             <h2>Playlist</h2>
-            <div id="comments-display">
+            <div id="star_video-display">
                 <?php
                 // 連接到數據庫
                 // 確保已經包含了數據庫連接代碼
@@ -359,26 +418,10 @@ $conn = require_once "config.php";
                     die("連接失敗: " . $conn->connect_error);
                 }
 
-                // 假設 $user_id 包含當前用戶的 ID
-                $user_id = $_SESSION["user_id"];
-
-                // 準備 SQL 查詢來選擇所有被該用戶標記的影片
-                // 注意: 這裡我假設 'youtube_video_id' 是正確的欄位名
-                $sql = "SELECT DISTINCT youtube.video_id, youtube.title, youtube.thumbnail_link 
-                        FROM youtube_trending_videos AS youtube 
-                        INNER JOIN star ON youtube.video_id = star.video_id 
-                        WHERE star.user_id = ?";
-                // 預處理和綁定
-                $stmt = $conn->prepare($sql);
-                $stmt->bind_param("i", $user_id);
-
-                // 執行語句並獲取結果
-                $stmt->execute();
-                $result = $stmt->get_result();
 
                 // 檢查是否有結果
                 if ($result->num_rows > 0) {
-                    // 輸出每個影片的信息
+                    // 输出每个影片的信息
                     while ($row = $result->fetch_assoc()) {
                         echo "<div class='video'>";
                         echo "<img src='" . htmlspecialchars($row['thumbnail_link']) . "' alt='Thumbnail'>";
@@ -392,22 +435,34 @@ $conn = require_once "config.php";
                 }
                 ?>
             </div>
+
+            <div id="pagination">
+                <?php
+                // 保留原有的 page 参数
+                $currentPage = isset($_GET['page']) ? $_GET['page'] : '';
+                for ($i = 1; $i <= $totalPages; $i++) {
+                    $link = htmlspecialchars("welcome.php?page=$currentPage&videoPage=$i");
+                    echo $i == $videoPage ? "<span>$i </span>" : "<a href='$link'>$i</a> ";
+                }
+                ?>
+            </div>
         </div>
     </section>
-    <script>//starvideo function
+    <script>
+        //starvideo function
         function handleStarClick(starElement) {
             //var title = starElement.getAttribute('data-title');
-            var video_id = starElement.getAttribute('data-video-id');
+            var youtube_video_id = starElement.getAttribute('data-youtube-video-id');
             var isStarred = starElement.getAttribute('data-starred');
-            starVideo(video_id, starElement, isStarred);
+            starVideo(youtube_video_id, starElement, isStarred);
         }
 
         // 保留您现有的 starVideo 和 unstarVideo 函数
-        function starVideo(video_id, starElement, isStarred) {
+        function starVideo(youtube_video_id, starElement, isStarred) {
             var xhr = new XMLHttpRequest();
             xhr.open("POST", "star_video.php", true);
             xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-            xhr.onreadystatechange = function () {
+            xhr.onreadystatechange = function() {
                 if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
                     try {
                         var response = JSON.parse(this.responseText);
@@ -433,24 +488,7 @@ $conn = require_once "config.php";
             };
 
             var act = isStarred === 'true' ? "unstar" : "star";
-            xhr.send("video_id=" + encodeURIComponent(video_id) + "&action=" + act);
-        }
-        function updatePlaylist(video_id, isStarred) {
-            event.preventDefault(); // Prevent default form submission if used within a form
-            xhr.open('POST', 'show_playlist.php', true);
-            xhr.onload = function () {
-                if (xhr.status === 200) {
-                    var response = JSON.parse(xhr.responseText);
-                    if (response.success === 'YES') {
-                        updatePlaylistDisplay(); // Update the playlist display on the page
-                    } else {
-                        alert('Error: ' + (response.error || 'Failed to update the playlist.'));
-                    }
-                } else {
-                    alert('An error occurred while updating the playlist.');
-                }
-            };
-            xhr.send(formData);
+            xhr.send("youtube_video_id=" + encodeURIComponent(youtube_video_id) + "&action=" + act);
         }
     </script>
 </body>
