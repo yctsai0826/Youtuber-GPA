@@ -12,6 +12,7 @@ if (isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true) {
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <link rel="icon" type="image/png" href="icon.ico"> <!-- Corrected Favicon Link -->
     <title>登入介面</title>
     <style>
         body {
