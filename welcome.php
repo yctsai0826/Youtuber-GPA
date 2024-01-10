@@ -229,118 +229,148 @@ $conn = require_once "config.php";
 
         ?>
 
-        <section id="blog">
-            <h2>Blog</h2>
+        <?php
+        // 假设 'config.php' 包含数据库连接信息
+        // $conn = require_once "config.php";
+
+        $commentsPerPage = 5; // 每页显示的评论数
+        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1; // 当前页码
+        $offset = ($page - 1) * $commentsPerPage; // 计算当前页的第一条评论的索引
+
+        // 查询总评论数
+        $totalCommentsQuery = "SELECT COUNT(*) AS total FROM comments";
+        $totalResult = $conn->query($totalCommentsQuery);
+        $totalRow = $totalResult->fetch_assoc();
+        $totalComments = $totalRow['total'];
+        $totalPages = ceil($totalComments / $commentsPerPage); // 总页数
+
+        // 查询当前页的评论
+        $sql = "SELECT nickname, content, created_at FROM comments ORDER BY created_at DESC LIMIT $offset, $commentsPerPage";
+        $result = $conn->query($sql);
+        ?>
+
+
+
+
+        <section id="Comment">
+            <h2>Comment</h2>
             <article>
                 <form id="comment-form">
                     <textarea id="comment-textarea" name="comment" placeholder="Enter comment..."></textarea>
                     <button type="submit">Submit Comment</button>
                 </form>
                 <script>
-                // This function will be called when the form is submitted
-                function submitComment(event) {
-                    event.preventDefault(); // 防止表單的默認提交行為
+                    // This function will be called when the form is submitted
+                    function submitComment(event) {
+                        event.preventDefault(); // 防止表單的默認提交行為
 
-                    var xhr = new XMLHttpRequest();
-                    var formData = new FormData(document.getElementById('comment-form'));
-                    xhr.open('POST', 'handle_comment.php', true);
-                    xhr.onload = function() {
-                        if (xhr.status === 200) {
-                            var response = JSON.parse(xhr.responseText);
-                            if (response.success) {
-                                var commentsDisplay = document.getElementById('comments-display');
-                                // 獲取當前時間並格式化為 ISO 8601 字符串
-                                var now = new Date();
-                                var year = now.getFullYear();
-                                var month = ('0' + (now.getMonth() + 1)).slice(-2);
-                                var day = ('0' + now.getDate()).slice(-2);
-                                var hours = ('0' + now.getHours()).slice(-2);
-                                var minutes = ('0' + now.getMinutes()).slice(-2);
-                                var seconds = ('0' + now.getSeconds()).slice(-2);
-                                var timeString = year + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':' + seconds;
-                                // 創建顯示留言和時間的HTML
-                                var newCommentHTML = '<div><strong>' + 'test' + '</strong> ' + timeString + '<br>' +'<br>' + response.comment + '</div>';
-                                // 將新留言插入到留言顯示區域的開始位置
-                                commentsDisplay.insertAdjacentHTML('afterbegin', newCommentHTML);
-                                document.getElementById('comment-textarea').value = ''; // 清空文本區域
+                        var xhr = new XMLHttpRequest();
+                        var formData = new FormData(document.getElementById('comment-form'));
+                        xhr.open('POST', 'handle_comment.php', true);
+                        xhr.onload = function() {
+                            if (xhr.status === 200) {
+                                var response = JSON.parse(xhr.responseText);
+                                if (response.success) {
+                                    var commentsDisplay = document.getElementById('comments-display');
+                                    // 獲取當前時間並格式化為 ISO 8601 字符串
+                                    var now = new Date();
+                                    var year = now.getFullYear();
+                                    var month = ('0' + (now.getMonth() + 1)).slice(-2);
+                                    var day = ('0' + now.getDate()).slice(-2);
+                                    var hours = ('0' + now.getHours()).slice(-2);
+                                    var minutes = ('0' + now.getMinutes()).slice(-2);
+                                    var seconds = ('0' + now.getSeconds()).slice(-2);
+                                    var timeString = year + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':' + seconds;
+                                    // 創建顯示留言和時間的HTML
+                                    var newCommentHTML = '<div><strong>' + 'test' + '</strong> ' + timeString + '<br>' + '<br>' + response.comment + '</div>';
+                                    // 將新留言插入到留言顯示區域的開始位置
+                                    commentsDisplay.insertAdjacentHTML('afterbegin', newCommentHTML);
+                                    document.getElementById('comment-textarea').value = ''; // 清空文本區域
+                                } else {
+                                    alert('Error: ' + response.error);
+                                }
                             } else {
-                                alert('Error: ' + response.error);
+                                alert('An error occurred while submitting the comment.');
                             }
-                        } else {
-                            alert('An error occurred while submitting the comment.');
-                        }
-                    };
-                    xhr.send(formData);
-                }
+                        };
+                        xhr.send(formData);
+                    }
 
 
 
-                // Function to attach the event listener to the form
+                    // Function to attach the event listener to the form
                     document.addEventListener('DOMContentLoaded', function() {
                         document.getElementById('comment-form').addEventListener('submit', submitComment);
                     });
                 </script>
                 <div id="comments-display">
                     <?php
-                    // 連接到數據庫
-                    // $conn = require_once "config.php";
-                    
-                    // 檢查連接
-                    if ($conn->connect_error) {
-                        die("Connection failed: " . $conn->connect_error);
-                    }
-
-                    // 從數據庫獲取評論
-                    $sql = "SELECT nickname, content, created_at FROM comments ORDER BY created_at DESC";
-                    $result = $conn->query($sql);
-
                     if ($result && $result->num_rows > 0) {
-                        // 輸出評論
+                        // 输出评论
                         while ($row = $result->fetch_assoc()) {
                             echo "<div class='comment'>";
                             echo "<p><strong>" . htmlspecialchars($row['nickname']) . "</strong> <span>" . htmlspecialchars($row['created_at']) . "</span></p>";
                             echo "<p>" . htmlspecialchars($row['content']) . "</p>";
                             echo "</div>";
                         }
+                    } else {
+                        echo "<p>No comments yet.</p>";
+                    }
+                    ?>
+                </div>
+
+                <div id="pagination">
+                    <?php
+                    for ($i = 1; $i <= $totalPages; $i++) {
+                        if ($i == $page) {
+                            echo "<span>$i </span>";
+                        } else {
+                            echo "<a href='?page=$i'>$i</a> ";
+                        }
                     }
                     ?>
                 </div>
         </section>
         <!-- End of content from website.html -->
+        <?php
+        // 确保已经包含了数据库连接代码
+        // 例如: $conn = new mysqli('主机', '用户名', '密码', '数据库名');
+
+        $videosPerPage = 4; // 每页显示的影片数
+        $videoPage = isset($_GET['videoPage']) ? (int)$_GET['videoPage'] : 1; // 当前视频页码
+        $offset = ($videoPage - 1) * $videosPerPage; // 计算当前页的第一部影片的索引
+
+        // 假设 $user_id 包含当前用户的 ID
+        $user_id = $_SESSION["user_id"];
+
+        // 查询总影片数
+        $totalVideosQuery = "SELECT COUNT(*) AS total FROM star WHERE user_id = ?";
+        $totalStmt = $conn->prepare($totalVideosQuery);
+        $totalStmt->bind_param("i", $user_id);
+        $totalStmt->execute();
+        $totalResult = $totalStmt->get_result();
+        $totalRow = $totalResult->fetch_assoc();
+        $totalVideos = $totalRow['total'];
+        $totalPages = ceil($totalVideos / $videosPerPage); // 总页数
+
+        // 查询当前页的影片
+        $sql = "SELECT DISTINCT youtube.video_id, youtube.title, youtube.thumbnail_link 
+        FROM youtube_trending_videos AS youtube 
+        INNER JOIN star ON youtube.video_id = star.video_id 
+        WHERE star.user_id = ? 
+        LIMIT ?, ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("iii", $user_id, $offset, $videosPerPage);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        ?>
 
         <div class="right-sidebar">
             <h2>Playlist</h2>
-            <div id="comments-display">
+            <div id="star_video-display">
                 <?php
-                // 連接到數據庫
-                // 確保已經包含了數據庫連接代碼
-                // 例如: $conn = new mysqli('主機', '用戶名', '密碼', '數據庫名');
-                
-                // 檢查連接
-                if ($conn->connect_error) {
-                    die("連接失敗: " . $conn->connect_error);
-                }
-
-                // 假設 $user_id 包含當前用戶的 ID
-                $user_id = $_SESSION["user_id"];
-
-                // 準備 SQL 查詢來選擇所有被該用戶標記的影片
-                // 注意: 這裡我假設 'youtube_video_id' 是正確的欄位名
-                $sql = "SELECT DISTINCT youtube.video_id, youtube.title, youtube.thumbnail_link 
-                        FROM youtube_trending_videos AS youtube 
-                        INNER JOIN star ON youtube.video_id = star.video_id 
-                        WHERE star.user_id = ?";
-                // 預處理和綁定
-                $stmt = $conn->prepare($sql);
-                $stmt->bind_param("i", $user_id);
-
-                // 執行語句並獲取結果
-                $stmt->execute();
-                $result = $stmt->get_result();
-
-                // 檢查是否有結果
                 if ($result->num_rows > 0) {
-                    // 輸出每個影片的信息
+                    // 输出每个影片的信息
                     while ($row = $result->fetch_assoc()) {
                         echo "<div class='video'>";
                         echo "<img src='" . htmlspecialchars($row['thumbnail_link']) . "' alt='Thumbnail'>";
@@ -352,9 +382,21 @@ $conn = require_once "config.php";
                 }
                 ?>
             </div>
+
+            <div id="pagination">
+                <?php
+                // 保留原有的 page 参数
+                $currentPage = isset($_GET['page']) ? $_GET['page'] : '';
+                for ($i = 1; $i <= $totalPages; $i++) {
+                    $link = htmlspecialchars("welcome.php?page=$currentPage&videoPage=$i");
+                    echo $i == $videoPage ? "<span>$i </span>" : "<a href='$link'>$i</a> ";
+                }
+                ?>
+            </div>
         </div>
     </section>
-    <script>//starvideo function
+    <script>
+        //starvideo function
         function handleStarClick(starElement) {
             //var title = starElement.getAttribute('data-title');
             var video_id = starElement.getAttribute('data-video-id');
@@ -367,7 +409,7 @@ $conn = require_once "config.php";
             var xhr = new XMLHttpRequest();
             xhr.open("POST", "star_video.php", true);
             xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-            xhr.onreadystatechange = function () {
+            xhr.onreadystatechange = function() {
                 if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
                     try {
                         var response = JSON.parse(this.responseText);
@@ -395,10 +437,11 @@ $conn = require_once "config.php";
             var act = isStarred === 'true' ? "unstar" : "star";
             xhr.send("video_id=" + encodeURIComponent(video_id) + "&action=" + act);
         }
+
         function updatePlaylist(video_id, isStarred) {
             event.preventDefault(); // Prevent default form submission if used within a form
             xhr.open('POST', 'show_playlist.php', true);
-            xhr.onload = function () {
+            xhr.onload = function() {
                 if (xhr.status === 200) {
                     var response = JSON.parse(xhr.responseText);
                     if (response.success === 'YES') {
