@@ -15,13 +15,13 @@ $conn = require_once "config.php";
     <style>
         body {
             /*color <body>*/
-            font-family: Arial, sans-serif;
+            font-family: Georgia, sans-serif;
             background-color: #f0f0f0;
             color: #477238;
         }
 
         h1 {
-            color: #0066cc;
+            color: #ffffff;
         }
 
 
@@ -29,11 +29,38 @@ $conn = require_once "config.php";
             grid-column: 2 / 4;
             grid-row: 1;
             /*z-index: 10;*/
-            padding: 20px;
+            padding: 30px;
             text-align: center;
-            background: #1abc9c;
+            background-image: url('header.gif');
+            /* Path to your GIF file */
             color: white;
             font-size: 30px;
+        }
+
+        .top-right {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 20px;
+            position: absolute;
+            top: 0;
+            right: 0;
+        }
+
+        .top-right a,
+        .top-right h1 {
+            margin-left: 20px;
+            color: #ffffff;
+            text-decoration: none;
+        }
+
+        .search-video {
+            text-align: center;
+            background: #fff;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin: auto;
         }
 
         .youtube-videos {
@@ -79,6 +106,19 @@ $conn = require_once "config.php";
             /* 字体加粗 */
         }
 
+        .video-title {
+            padding: 10px;
+        }
+
+        .video-title a {
+            text-decoration: none;
+            /* 去除链接下划线 */
+            color: white;
+            /* 文本颜色 */
+            font-weight: bold;
+            /* 字体加粗 */
+        }
+
         .star-btn {
             cursor: pointer;
             color: grey;
@@ -100,12 +140,20 @@ $conn = require_once "config.php";
             right: 0;
             z-index: 5;
             width: 200px;
-            background-color: #C4E1DD;
+            background-color: #082A40;
             padding: 20px;
             border-radius: 10px;
             border: 1px solid #ccc;
             box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
             transform: translateY(-50%);
+        }
+
+        .right-sidebar h2 {
+            color: #FFF6ED;
+        }
+
+        .right-sidebar p {
+            color: #FFF6ED;
         }
 
         .main-content {
@@ -131,8 +179,8 @@ $conn = require_once "config.php";
         <!--header-->
         <div class="header">
             <h1>Youtuber GPA</h1>
-            <p>My supercool header</p>
         </div>
+
 
 
         <?php
@@ -152,27 +200,28 @@ $conn = require_once "config.php";
             exit;
         }
         ?>
-
         <!-- <form method="post" action="logout.php">
         <input type="submit" value="登出">
         </form> -->
         <!-- <a href="change.php">更改密码</a> -->
         <!-- 在这里添加搜索表单 -->
-        <form action="" method="get">
-            <input type="text" name="search" placeholder="搜索视频">
-            <select name="region">
-                <option value="UK">英国</option>
-                <option value="US" selected>美国</option>
-                <option value="KR">韩国</option>
-                <option value="JP">日本</option>
-            </select>
-            <input type="submit" value="搜索">
-        </form>
+        <div class="search-video">
+            <form action="" method="get">
+                <input type="text" name="search" placeholder="找影片">
+                <select name="region">
+                    <option value="UK">英國</option>
+                    <option value="US" selected>美國</option>
+                    <option value="KR">韓國</option>
+                    <option value="JP">日本</option>
+                </select>
+                <input type="submit" value="搜索">
+            </form>
+        </div>
 
         <?php
         $search = isset($_GET['search']) ? $_GET['search'] : '';
         $region = isset($_GET['region']) ? $_GET['region'] : 'US'; // 默认为美国
-
+        
         // 根据区域选择相应的表
         $tableName = '';
         switch ($region) {
@@ -194,20 +243,18 @@ $conn = require_once "config.php";
         }
 
 
-        $sql = "SELECT a.v_id, a.yv_id, gpa, thumbnail_link, title ,a.sv_id
-        FROM (SELECT youtube.video_id as v_id, youtube.youtube_video_id as yv_id, gpa, thumbnail_link, title, star.video_id as sv_id,ROW_NUMBER() 
-        OVER (PARTITION BY youtube.youtube_video_id) AS rn FROM $tableName as youtube
-        LEFT JOIN star ON ( user_id = $user_id AND star.video_id = youtube.video_id)) as a ";
+        $sql = "SELECT a.v_id, a.yv_id, gpa, thumbnail_link, title ,a.syv_id
+        FROM (SELECT youtube.video_id as v_id, youtube.youtube_video_id as yv_id, gpa, thumbnail_link, title, star.youtube_video_id as syv_id
+        FROM $tableName as youtube
+        LEFT JOIN star ON ( user_id = $user_id AND star.youtube_video_id = youtube.youtube_video_id)) as a ";
         if ($search !== '') {
             $sql .= " WHERE title LIKE '%" . $conn->real_escape_string($search) . "%'";
-            $sql .= " AND rn = 1 ORDER BY gpa DESC LIMIT 10";
+            $sql .= " ORDER BY gpa DESC LIMIT 10;";
         } else {
-            $sql .= " WHERE rn = 1 ORDER BY gpa DESC LIMIT 10";
+            $sql .= "ORDER BY gpa DESC LIMIT 10;";
         }
 
-        // $sql = "SELECT video_id, thumbnail_link, title FROM youtube_trending_videos LIMIT 5";
         error_log($sql);
-
         $result = mysqli_query($conn, $sql);
 
         // 检查查询结果
@@ -223,20 +270,20 @@ $conn = require_once "config.php";
                 echo "</div>";
                 echo "<div class='video-info'>";
                 //star
-                echo "<div class='video' data-video-id='" . $row['v_id'] . "'>"; // Fixed the syntax here
-                echo "<span class='" . (empty($row['sv_id']) ? 'star-btn' : 'star-btn on') . "' 
+                echo "<div class='video' data-youtube-video-id='" . $row['yv_id'] . "'>"; // Fixed the syntax here
+                echo "<span class='" . (empty($row['syv_id']) ? 'star-btn' : 'star-btn on') . "' 
                     onclick='handleStarClick(this)' 
-                    data-starred='" . (empty($row['sv_id']) ? 'false' : 'true') . "'
-                    data-video-id='" . htmlspecialchars($row['v_id']) . "'>&#9733</span>"; //. class # id
+                    data-starred='" . (empty($row['syv_id']) ? 'false' : 'true') . "'
+                    data-youtube-video-id='" . htmlspecialchars($row['yv_id']) . "'>&#9733</span>"; //. class # id
                 echo "</div>"; // Closing div for 'video'
                 echo "<p><a href='" . htmlspecialchars($videoUrl) . "'>" . htmlspecialchars($row['title']) . "</a></p>";
-                echo "<p>" . htmlspecialchars($row['gpa']) . "</p>";
+                echo "<p>GPA  " . htmlspecialchars($row['gpa']) . "</p>";
                 echo "</div>";
                 echo "</div>";
             }
             echo "</div>";
         } else {
-            echo "<p>没有找到视频。</p>";
+            echo "<p>沒有符合條件之影片。</p>";
         }
 
 
@@ -282,7 +329,8 @@ $conn = require_once "config.php";
                         var xhr = new XMLHttpRequest();
                         var formData = new FormData(document.getElementById('comment-form'));
                         xhr.open('POST', 'handle_comment.php', true);
-                        xhr.onload = function() {
+
+                        xhr.onload = function () {
                             if (xhr.status === 200) {
                                 var response = JSON.parse(xhr.responseText);
                                 if (response.success) {
@@ -314,7 +362,9 @@ $conn = require_once "config.php";
 
 
                     // Function to attach the event listener to the form
-                    document.addEventListener('DOMContentLoaded', function() {
+
+                    document.addEventListener('DOMContentLoaded', function () {
+
                         document.getElementById('comment-form').addEventListener('submit', submitComment);
                     });
                 </script>
@@ -368,9 +418,9 @@ $conn = require_once "config.php";
         $totalPages = ceil($totalVideos / $videosPerPage); // 总页数
 
         // 查询当前页的影片
-        $sql = "SELECT DISTINCT youtube.video_id, youtube.title, youtube.thumbnail_link 
-        FROM youtube_trending_videos AS youtube 
-        INNER JOIN star ON youtube.video_id = star.video_id 
+        $sql = "SELECT DISTINCT youtube.youtube_video_id, youtube.title, youtube.thumbnail_link 
+        FROM total_youtube_videos AS youtube 
+        INNER JOIN star ON youtube.youtube_video_id = star.youtube_video_id 
         WHERE star.user_id = ? 
         LIMIT ?, ?";
         $stmt = $conn->prepare($sql);
@@ -383,16 +433,31 @@ $conn = require_once "config.php";
             <h2>Playlist</h2>
             <div id="star_video-display">
                 <?php
+                // 連接到數據庫
+                // 確保已經包含了數據庫連接代碼
+                // 例如: $conn = new mysqli('主機', '用戶名', '密碼', '數據庫名');
+                
+                // 檢查連接
+                if ($conn->connect_error) {
+                    die("連接失敗: " . $conn->connect_error);
+                }
+
+
+                // 檢查是否有結果
                 if ($result->num_rows > 0) {
                     // 输出每个影片的信息
                     while ($row = $result->fetch_assoc()) {
-                        echo "<div class='video'>";
+                        $videoUrl = "https://www.youtube.com/watch?v=" . $row['youtube_video_id'];
+                        echo "<div class='video-title'>";
                         echo "<img src='" . htmlspecialchars($row['thumbnail_link']) . "' alt='Thumbnail'>";
-                        echo "<h3>" . htmlspecialchars($row['title']) . "</h3>";
+                        // echo "<h3>" . htmlspecialchars($row['title']) . "</h3>";
+                        echo "<p><a href='" . htmlspecialchars($videoUrl) . "'>" . htmlspecialchars($row['title']) . "</a></p>";
                         echo "</div>";
                     }
                 } else {
-                    echo "沒有找到收藏的影片。";
+                    echo "<div class = 'playlist'>";
+                    echo "<p>沒有找到收藏的影片。</p>";
+                    echo "</div>";
                 }
                 ?>
             </div>
@@ -412,14 +477,13 @@ $conn = require_once "config.php";
     <script>
         //starvideo function
         function handleStarClick(starElement) {
-            //var title = starElement.getAttribute('data-title');
-            var video_id = starElement.getAttribute('data-video-id');
+            var youtube_video_id = starElement.getAttribute('data-youtube-video-id');
             var isStarred = starElement.getAttribute('data-starred');
-            starVideo(video_id, starElement, isStarred);
+            starVideo(youtube_video_id, starElement, isStarred);
         }
-
+        
         // 保留您现有的 starVideo 和 unstarVideo 函数
-        function starVideo(video_id, starElement, isStarred) {
+        function starVideo(youtube_video_id, starElement, isStarred) {
             var xhr = new XMLHttpRequest();
             xhr.open("POST", "star_video.php", true);
             xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -438,36 +502,18 @@ $conn = require_once "config.php";
                             }
                             // 在这里添加逻辑来更新页面上的播放列表或其他元素
                         } else if (response.error) {
-                            alert("操作失败: " + response.error);
+                            alert("操作失敗: " + response.error);
                         }
                     } catch (e) {
-                        console.error("JSON 解析错误:", e);
+                        console.error("JSON 解析錯誤:", e);
                     }
                 } else if (this.readyState === XMLHttpRequest.DONE) {
-                    console.error("请求错误，状态码:", this.status);
+                    console.error("請求錯誤，狀態碼:", this.status);
                 }
             };
 
             var act = isStarred === 'true' ? "unstar" : "star";
-            xhr.send("video_id=" + encodeURIComponent(video_id) + "&action=" + act);
-        }
-
-        function updatePlaylist(video_id, isStarred) {
-            event.preventDefault(); // Prevent default form submission if used within a form
-            xhr.open('POST', 'show_playlist.php', true);
-            xhr.onload = function() {
-                if (xhr.status === 200) {
-                    var response = JSON.parse(xhr.responseText);
-                    if (response.success === 'YES') {
-                        updatePlaylistDisplay(); // Update the playlist display on the page
-                    } else {
-                        alert('Error: ' + (response.error || 'Failed to update the playlist.'));
-                    }
-                } else {
-                    alert('An error occurred while updating the playlist.');
-                }
-            };
-            xhr.send(formData);
+            xhr.send("youtube_video_id=" + encodeURIComponent(youtube_video_id) + "&action=" + act);
         }
     </script>
 </body>
