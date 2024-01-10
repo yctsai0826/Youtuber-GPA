@@ -11,13 +11,13 @@ $conn = require_once "config.php";
 <head>
     <meta charset="UTF-8">
     <title>影片列表</title>
-    <link rel="icon" type="image/ico" href="loopy.ico">
+    <link rel="icon" type="image/ico" href="icon.ico">
     <style>
         body {
             /*color <body>*/
             font-family: Georgia, sans-serif;
             background-color: #f0f0f0;
-            color: #477238;
+            color: #082A40;
         }
 
         h1 {
@@ -35,6 +35,11 @@ $conn = require_once "config.php";
             /* Path to your GIF file */
             color: white;
             font-size: 30px;
+            text-shadow:
+                -2px -2px 0 #000,
+                2px -2px 0 #000,
+                -2px 2px 0 #000,
+                2px 2px 0 #000;
         }
 
         .top-right {
@@ -56,12 +61,50 @@ $conn = require_once "config.php";
 
         .search-video {
             text-align: center;
-            background: #fff;
-            padding: 40px;
-            border-radius: 15px;
+            margin: 30px auto;
+            /*width: fit-content;*/
+            /* Adjust the width as per content */
+            padding: 15px;
+            background: #ffffff;
+            /* Background color of the search box */
+            border-radius: 25px;
+            /* Rounded corners */
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            margin: auto;
         }
+
+        .search-container input[type="text"],
+        .search-container select,
+        .search-container button {
+            padding: 10px;
+            margin: 5px;
+            border-radius: 10px;
+            /* Rounded corners for input, select, and button */
+            border: 1px solid #ddd;
+            /* Border for the elements */
+            outline: none;
+        }
+
+        .search-container input[type="text"] {
+            width: 200px;
+            background: #ffffff;
+            /* Adjust as needed */
+        }
+
+        .search-container button {
+            background-color: #082A40;
+            /* Button background color */
+            color: #fff;
+            /* Button text color */
+            cursor: pointer;
+            border: none;
+        }
+
+        .search-container button:hover {
+            background-color: #245C73;
+            /* Button hover effect */
+        }
+
+
 
         .youtube-videos {
             display: grid;
@@ -134,18 +177,44 @@ $conn = require_once "config.php";
             color: rgb(232, 166, 14);
         }
 
+        .star-and-gpa {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .gpa {
+            /* Additional styles for GPA text */
+            margin-left: auto;
+            /* Push to the right */
+            /* You can add more styles such as font size, color, etc. */
+        }
+
         .right-sidebar {
-            position: fixed;
+            position: absolute;
+            /* Changes the sidebar to scroll with the page */
             top: 50%;
-            right: 0;
+            /* Adjusts vertical positioning */
+            right: 10px;
+            /* Keeps the sidebar fixed on the page */
+            top: 56%;
+            /* Adjusts vertical positioning */
+            right: 15px;
+            /* Adds space on the right side */
             z-index: 5;
-            width: 200px;
             background-color: #082A40;
             padding: 20px;
             border-radius: 10px;
             border: 1px solid #ccc;
             box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
-            transform: translateY(-50%);
+            width: 300px;
+            /* Set your desired width */
+            height: auto;
+            /* Adjusts height based on content */
+            max-height: 80%;
+            /* Maximum height */
+            min-height: 200px;
+            /* Minimum height */
         }
 
         .right-sidebar h2 {
@@ -164,6 +233,19 @@ $conn = require_once "config.php";
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
+        .star-and-gpa {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .gpa {
+            /* Additional styles for GPA text */
+            margin-left: auto;
+            /* Push to the right */
+            /* You can add more styles such as font size, color, etc. */
+        }
+
         /* 响应式设计 */
         @media (max-width: 600px) {
             .youtube-videos {
@@ -179,6 +261,9 @@ $conn = require_once "config.php";
         <!--header-->
         <div class="header">
             <h1>Youtuber GPA</h1>
+            <br></br>
+            <br></br>
+            <br></br>
         </div>
 
         <div class="top-right">
@@ -191,16 +276,18 @@ $conn = require_once "config.php";
         <!-- <a href="change.php">更改密码</a> -->
         <!-- 在这里添加搜索表单 -->
         <div class="search-video">
-            <form action="" method="get">
-                <input type="text" name="search" placeholder="找影片">
-                <select name="region">
-                    <option value="UK">英國</option>
-                    <option value="US" selected>美國</option>
-                    <option value="KR">韓國</option>
-                    <option value="JP">日本</option>
-                </select>
-                <input type="submit" value="搜索">
-            </form>
+            <div class="search-container">
+                <form action="" method="get">
+                    <input type="text" name="search" placeholder="找影片">
+                    <select name="region">
+                        <option value="UK">英國</option>
+                        <option value="US" selected>美國</option>
+                        <option value="KR">韓國</option>
+                        <option value="JP">日本</option>
+                    </select>
+                    <button type="submit" value="搜索">搜尋</button>
+                </form>
+            </div>
         </div>
 
         <?php
@@ -255,14 +342,17 @@ $conn = require_once "config.php";
                 echo "</div>";
                 echo "<div class='video-info'>";
                 //star
+                echo "<div class='star-and-gpa'>";
                 echo "<div class='video' data-youtube-video-id='" . $row['yv_id'] . "'>"; // Fixed the syntax here
                 echo "<span class='" . (empty($row['syv_id']) ? 'star-btn' : 'star-btn on') . "' 
                     onclick='handleStarClick(this)' 
                     data-starred='" . (empty($row['syv_id']) ? 'false' : 'true') . "'
                     data-youtube-video-id='" . htmlspecialchars($row['yv_id']) . "'>&#9733</span>"; //. class # id
+                echo "<p>GPA  " . htmlspecialchars($row['gpa']) . "</p>";
+                echo "</div>"; // Closing div for 'star-and-gpa'
                 echo "</div>"; // Closing div for 'video'
                 echo "<p><a href='" . htmlspecialchars($videoUrl) . "'>" . htmlspecialchars($row['title']) . "</a></p>";
-                echo "<p>GPA  " . htmlspecialchars($row['gpa']) . "</p>";
+
                 echo "</div>";
                 echo "</div>";
             }
@@ -277,18 +367,18 @@ $conn = require_once "config.php";
         <?php
         // 假设 'config.php' 包含数据库连接信息
         // $conn = require_once "config.php";
-
+        
         $commentsPerPage = 5; // 每页显示的评论数
-        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1; // 当前页码
+        $page = isset($_GET['page']) ? (int) $_GET['page'] : 1; // 当前页码
         $offset = ($page - 1) * $commentsPerPage; // 计算当前页的第一条评论的索引
-
+        
         // 查询总评论数
         $totalCommentsQuery = "SELECT COUNT(*) AS total FROM comments";
         $totalResult = $conn->query($totalCommentsQuery);
         $totalRow = $totalResult->fetch_assoc();
         $totalComments = $totalRow['total'];
         $totalPages = ceil($totalComments / $commentsPerPage); // 总页数
-
+        
         // 查询当前页的评论
         $sql = "SELECT nickname, content, created_at FROM comments ORDER BY created_at DESC LIMIT $offset, $commentsPerPage";
         $result = $conn->query($sql);
@@ -383,11 +473,11 @@ $conn = require_once "config.php";
         <?php
         // 确保已经包含了数据库连接代码
         // 例如: $conn = new mysqli('主机', '用户名', '密码', '数据库名');
-
+        
         $videosPerPage = 4; // 每页显示的影片数
-        $videoPage = isset($_GET['videoPage']) ? (int)$_GET['videoPage'] : 1; // 当前视频页码
+        $videoPage = isset($_GET['videoPage']) ? (int) $_GET['videoPage'] : 1; // 当前视频页码
         $offset = ($videoPage - 1) * $videosPerPage; // 计算当前页的第一部影片的索引
-
+        
         // 假设 $user_id 包含当前用户的 ID
         $user_id = $_SESSION["user_id"];
 
@@ -400,7 +490,7 @@ $conn = require_once "config.php";
         $totalRow = $totalResult->fetch_assoc();
         $totalVideos = $totalRow['total'];
         $totalPages = ceil($totalVideos / $videosPerPage); // 总页数
-
+        
         // 查询当前页的影片
         $sql = "SELECT DISTINCT youtube.youtube_video_id, youtube.title, youtube.thumbnail_link 
         FROM total_youtube_videos AS youtube 
@@ -465,13 +555,13 @@ $conn = require_once "config.php";
             var isStarred = starElement.getAttribute('data-starred');
             starVideo(youtube_video_id, starElement, isStarred);
         }
-        
+
         // 保留您现有的 starVideo 和 unstarVideo 函数
         function starVideo(youtube_video_id, starElement, isStarred) {
             var xhr = new XMLHttpRequest();
             xhr.open("POST", "star_video.php", true);
             xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-            xhr.onreadystatechange = function() {
+            xhr.onreadystatechange = function () {
                 if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
                     try {
                         var response = JSON.parse(this.responseText);
