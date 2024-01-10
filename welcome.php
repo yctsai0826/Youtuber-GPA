@@ -181,10 +181,25 @@ $conn = require_once "config.php";
             <h1>Youtuber GPA</h1>
         </div>
 
-        <div class="top-right">
-            <a href='logout.php'>登出</a>
-            <a href='change.php'>更改密碼</a>
-        </div>
+
+
+        <?php
+        echo "<h1>你好 " . $username . "</h1>";
+        echo "<a href='logout.php'>登出</a><br>";
+        echo "<a href='change.php'>更改密碼</a><br>";
+        //初始化url page video page
+        if (!isset($_GET['page']) || (int)$_GET['page'] < 1) {
+            // 保留其他GET参数
+            $query = $_GET;
+            $query['page'] = 1;
+            $query['VideoPage'] = 1;
+            $queryString = http_build_query($query);
+
+            // 构建带有 Page=1 的URL并重定向
+            header('Location: ' . $_SERVER['PHP_SELF'] . '?' . $queryString);
+            exit;
+        }
+        ?>
         <!-- <form method="post" action="logout.php">
         <input type="submit" value="登出">
         </form> -->
@@ -278,6 +293,8 @@ $conn = require_once "config.php";
         // 假设 'config.php' 包含数据库连接信息
         // $conn = require_once "config.php";
 
+        // 保留原有的 page 参数
+
         $commentsPerPage = 5; // 每页显示的评论数
         $page = isset($_GET['page']) ? (int)$_GET['page'] : 1; // 当前页码
         $offset = ($page - 1) * $commentsPerPage; // 计算当前页的第一条评论的索引
@@ -370,11 +387,10 @@ $conn = require_once "config.php";
                 <div id="pagination">
                     <?php
                     for ($i = 1; $i <= $totalPages; $i++) {
-                        if ($i == $page) {
-                            echo "<span>$i </span>";
-                        } else {
-                            echo "<a href='?page=$i'>$i</a> ";
-                        }
+                        $currentVideoPage = isset($_GET['VideoPage']) ? $_GET['VideoPage'] : '';
+                        // 删除了URL中的空格，并确保参数大小写一致
+                        $link = htmlspecialchars("welcome.php?page=$i&VideoPage=$currentVideoPage");
+                        echo $i == $page ? "<span>$i </span>" : "<a href='$link'>$i</a> ";
                     }
                     ?>
                 </div>
@@ -385,8 +401,8 @@ $conn = require_once "config.php";
         // 例如: $conn = new mysqli('主机', '用户名', '密码', '数据库名');
 
         $videosPerPage = 4; // 每页显示的影片数
-        $videoPage = isset($_GET['videoPage']) ? (int)$_GET['videoPage'] : 1; // 当前视频页码
-        $offset = ($videoPage - 1) * $videosPerPage; // 计算当前页的第一部影片的索引
+        $VideoPage = isset($_GET['VideoPage']) ? (int)$_GET['VideoPage'] : 1; // 当前视频页码
+        $offset = ($VideoPage - 1) * $videosPerPage; // 计算当前页的第一部影片的索引
 
         // 假设 $user_id 包含当前用户的 ID
         $user_id = $_SESSION["user_id"];
@@ -451,8 +467,8 @@ $conn = require_once "config.php";
                 // 保留原有的 page 参数
                 $currentPage = isset($_GET['page']) ? $_GET['page'] : '';
                 for ($i = 1; $i <= $totalPages; $i++) {
-                    $link = htmlspecialchars("welcome.php?page=$currentPage&videoPage=$i");
-                    echo $i == $videoPage ? "<span>$i </span>" : "<a href='$link'>$i</a> ";
+                    $link = htmlspecialchars("welcome.php?page=$currentPage&VideoPage=$i");
+                    echo $i == $VideoPage ? "<span>$i </span>" : "<a href='$link'>$i</a> ";
                 }
                 ?>
             </div>
