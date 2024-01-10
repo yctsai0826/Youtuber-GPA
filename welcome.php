@@ -56,7 +56,7 @@ if (!isset($_GET['page']) || (int)$_GET['page'] < 1) {
             font-size: 30px;
         }
 
-        .top-right {
+        /* .top-right {
             display: flex;
             justify-content: flex-end;
             align-items: center;
@@ -70,6 +70,20 @@ if (!isset($_GET['page']) || (int)$_GET['page'] < 1) {
         .top-right h1 {
             margin-left: 20px;
             color: #ffffff;
+            text-decoration: none;
+        } */
+
+        .top-left-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+        }
+
+        .header-item {
+            display: inline-block; /* 或者使用 inline */
+            margin-right: 10px; /* 添加一些右边距 */
+            color: white; /* 设置文本颜色为白色 */
             text-decoration: none;
         }
 
@@ -278,12 +292,14 @@ if (!isset($_GET['page']) || (int)$_GET['page'] < 1) {
 
 
         <?php
-        echo "<h1>你好 " . $username . "</h1>";
-        echo "<a href='logout.php'>登出</a><br>";
-        echo "<a href='change.php'>更改密碼</a><br>";
-        //初始化url page video page
-
+            echo "<div class='top-left-container'>";
+            echo "<span class='header-item'>你好 " . htmlspecialchars($username) . "</span>";
+            echo "<a class='header-item' href='logout.php'>登出</a>";
+            echo "<a class='header-item' href='change.php'>更改密碼</a>";
+            echo "</div>";
         ?>
+
+
         <!-- <form method="post" action="logout.php">
         <input type="submit" value="登出">
         </form> -->
