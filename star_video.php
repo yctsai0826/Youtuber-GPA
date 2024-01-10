@@ -9,7 +9,6 @@ $user_id = $_SESSION['user_id'];
 $action = $_POST['action'];
 
 if ($action == 'star') {
-
     $stmt = $conn->prepare("INSERT INTO star (user_id, video_id) VALUES (?, ?)");
 
     if ($stmt === false) {
