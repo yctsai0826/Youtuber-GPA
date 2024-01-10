@@ -10,9 +10,9 @@ if($_SERVER["REQUEST_METHOD"]=="POST"){
         $sql="INSERT INTO user (user_id, username, password)
             VALUES(NULL,'".$username."','".$password."')";
         if(mysqli_query($conn, $sql)){
-            echo "註冊成功!3秒後將自動跳轉頁面<br>";
+            echo "註冊成功!1秒後將自動跳轉頁面<br>";
             echo "<a href='index.php'>未成功跳轉頁面請點擊此</a>";
-            header("refresh:32;url=index.php");
+            header("refresh:1;url=index.php");
             exit;
         }else{
             echo "Error creating table: " . mysqli_error($conn);
