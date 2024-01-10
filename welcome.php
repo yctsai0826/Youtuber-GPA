@@ -394,22 +394,5 @@ $conn = require_once "config.php";
             var act = isStarred === 'true' ? "unstar" : "star";
             xhr.send("youtube_video_id=" + encodeURIComponent(youtube_video_id) + "&action=" + act);
         }
-        function updatePlaylist(youtube_video_id, isStarred) {
-            event.preventDefault(); // Prevent default form submission if used within a form
-            xhr.open('POST', 'show_playlist.php', true);
-            xhr.onload = function () {
-                if (xhr.status === 200) {
-                    var response = JSON.parse(xhr.responseText);
-                    if (response.success === 'YES') {
-                        updatePlaylistDisplay(); // Update the playlist display on the page
-                    } else {
-                        alert('Error: ' + (response.error || 'Failed to update the playlist.'));
-                    }
-                } else {
-                    alert('An error occurred while updating the playlist.');
-                }
-            };
-            xhr.send(formData);
-        }
     </script>
 </body>
