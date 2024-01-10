@@ -377,22 +377,6 @@ $conn = require_once "config.php";
                     die("連接失敗: " . $conn->connect_error);
                 }
 
-                // 假設 $user_id 包含當前用戶的 ID
-                $user_id = $_SESSION["user_id"];
-
-                // 準備 SQL 查詢來選擇所有被該用戶標記的影片
-                // 注意: 這裡我假設 'youtube_video_id' 是正確的欄位名
-                $sql = "SELECT DISTINCT youtube.youtube_video_id, youtube.title, youtube.thumbnail_link 
-                        FROM total_youtube_videos AS youtube 
-                        INNER JOIN star ON youtube.youtube_video_id = star.youtube_video_id
-                        WHERE star.user_id = ?";
-                // 預處理和綁定
-                $stmt = $conn->prepare($sql);
-                $stmt->bind_param("i", $user_id);
-
-                // 執行語句並獲取結果
-                $stmt->execute();
-                $result = $stmt->get_result();
 
                 // 檢查是否有結果
                 if ($result->num_rows > 0) {
