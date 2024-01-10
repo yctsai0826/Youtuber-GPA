@@ -178,7 +178,10 @@ $conn = require_once "config.php";
     <section>
         <!--header-->
         <div class="header">
-            <h1>Youtuber GPA</h1>
+            <h1>Youtube GPA</h1>
+            <h1><br></h1>
+            <h1><br></h1>
+            <h1><br></h1>
         </div>
 
 
