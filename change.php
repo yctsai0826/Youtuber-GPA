@@ -10,7 +10,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($new_password == $confirm_new_password) {
         // 处理密码更改逻辑
         $username = $_SESSION["username"];
-        $sql = "UPDATE user SET password = '".$new_password."' WHERE username = '".$username."'";
+        $sql = "UPDATE user SET password = '" . $new_password . "' WHERE username = '" . $username . "'";
 
         if (mysqli_query($conn, $sql)) {
             echo "密码更改成功。";
@@ -29,17 +29,69 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <title>更改密码</title>
-    <!-- 在这里可以添加其他的头部信息，比如样式表 -->
+    <title>更改密碼</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #f2f2f2;
+            margin: 0;
+        }
+
+        .form-container {
+            padding: 40px;
+            background: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        input[type=password],
+        input[type=submit] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+            border-radius: 15px;
+            box-sizing: border-box;
+        }
+
+        input[type=submit] {
+            background-color: #245C73;
+            color: white;
+            cursor: pointer;
+            border: none;
+            border-radius: 15px;
+        }
+
+        input[type=submit]:hover {
+            background-color: #144D75;
+        }
+    </style>
 </head>
+
 <body>
-    <form method="post">
-        新密码：<input type="password" name="new_password"><br>
-        确认新密码：<input type="password" name="confirm_new_password"><br>
-        <input type="submit" value="更改密码">
-    </form>
-    <!-- 在这里可以添加其他 HTML 内容 -->
+    <div class="form-container">
+        <form method="post">
+            <div>
+                <label for="new_password">新密碼：</label>
+                <input type="password" id="new_password" name="new_password"><br>
+            </div>
+            <div>
+                <label for="confirm_new_password">確認新密碼：</label>
+                <input type="password" id="confirm_new_password" name="confirm_new_password"><br>
+            </div>
+            <div>
+                <input type="submit" value="更改密碼">
+            </div>
+        </form>
+    </div>
 </body>
+
 </html>
