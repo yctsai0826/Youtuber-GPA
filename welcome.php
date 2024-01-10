@@ -4,6 +4,21 @@ $username = $_SESSION["username"];
 $user_id = $_SESSION["user_id"];
 //error_log(var_dump($_SESSION));
 $conn = require_once "config.php";
+if (!isset($_GET['page']) || (int)$_GET['page'] < 1) {
+    // 保留其他GET参数，同时确保page和VideoPage参数设置为1
+    $query = $_GET;
+    $query['page'] = 1;
+    $query['VideoPage'] = 1;  // 设置VideoPage参数为1
+
+    // 使用http_build_query构建查询字符串
+    $queryString = http_build_query($query);
+
+    // 构建完整的URL并重定向
+    $url = "http://localhost/Youtuber-GPA/welcome.php?" . $queryString;
+    header('Location: ' . $url);
+    exit;
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -191,17 +206,7 @@ $conn = require_once "config.php";
         echo "<a href='logout.php'>登出</a><br>";
         echo "<a href='change.php'>更改密碼</a><br>";
         //初始化url page video page
-        if (!isset($_GET['page']) || (int)$_GET['page'] < 1) {
-            // 保留其他GET参数
-            $query = $_GET;
-            $query['page'] = 1;
-            $query['VideoPage'] = 1;
-            $queryString = http_build_query($query);
 
-            // 构建带有 Page=1 的URL并重定向
-            header('Location: ' . $_SERVER['PHP_SELF'] . '?' . $queryString);
-            exit;
-        }
         ?>
         <!-- <form method="post" action="logout.php">
         <input type="submit" value="登出">
@@ -224,7 +229,7 @@ $conn = require_once "config.php";
         <?php
         $search = isset($_GET['search']) ? $_GET['search'] : '';
         $region = isset($_GET['region']) ? $_GET['region'] : 'US'; // 默认为美国
-        
+
         // 根据区域选择相应的表
         $tableName = '';
         switch ($region) {
@@ -333,7 +338,7 @@ $conn = require_once "config.php";
                         var formData = new FormData(document.getElementById('comment-form'));
                         xhr.open('POST', 'handle_comment.php', true);
 
-                        xhr.onload = function () {
+                        xhr.onload = function() {
                             if (xhr.status === 200) {
                                 var response = JSON.parse(xhr.responseText);
                                 if (response.success) {
@@ -366,7 +371,7 @@ $conn = require_once "config.php";
 
                     // Function to attach the event listener to the form
 
-                    document.addEventListener('DOMContentLoaded', function () {
+                    document.addEventListener('DOMContentLoaded', function() {
 
                         document.getElementById('comment-form').addEventListener('submit', submitComment);
                     });
@@ -439,7 +444,7 @@ $conn = require_once "config.php";
                 // 連接到數據庫
                 // 確保已經包含了數據庫連接代碼
                 // 例如: $conn = new mysqli('主機', '用戶名', '密碼', '數據庫名');
-                
+
                 // 檢查連接
                 if ($conn->connect_error) {
                     die("連接失敗: " . $conn->connect_error);
@@ -484,7 +489,7 @@ $conn = require_once "config.php";
             var isStarred = starElement.getAttribute('data-starred');
             starVideo(youtube_video_id, starElement, isStarred);
         }
-        
+
         // 保留您现有的 starVideo 和 unstarVideo 函数
         function starVideo(youtube_video_id, starElement, isStarred) {
             var xhr = new XMLHttpRequest();
