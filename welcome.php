@@ -231,7 +231,6 @@ $conn = require_once "config.php";
         }
 
         error_log($sql);
-        echo $sql;
         $result = mysqli_query($conn, $sql);
 
         // 检查查询结果
