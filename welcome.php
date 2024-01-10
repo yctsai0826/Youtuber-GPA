@@ -353,9 +353,9 @@ $conn = require_once "config.php";
         $totalPages = ceil($totalVideos / $videosPerPage); // 总页数
 
         // 查询当前页的影片
-        $sql = "SELECT DISTINCT youtube.video_id, youtube.title, youtube.thumbnail_link 
-        FROM youtube_trending_videos AS youtube 
-        INNER JOIN star ON youtube.video_id = star.video_id 
+        $sql = "SELECT DISTINCT youtube.youtube_video_id, youtube.title, youtube.thumbnail_link 
+        FROM total_youtube_videos AS youtube 
+        INNER JOIN star ON youtube.youtube_video_id = star.youtube_video_id 
         WHERE star.user_id = ? 
         LIMIT ?, ?";
         $stmt = $conn->prepare($sql);
