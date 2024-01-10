@@ -106,6 +106,19 @@ $conn = require_once "config.php";
             /* 字体加粗 */
         }
 
+        .video-title {
+            padding: 10px;
+        }
+
+        .video-title a {
+            text-decoration: none;
+            /* 去除链接下划线 */
+            color: white;
+            /* 文本颜色 */
+            font-weight: bold;
+            /* 字体加粗 */
+        }
+
         .star-btn {
             cursor: pointer;
             color: grey;
@@ -166,13 +179,9 @@ $conn = require_once "config.php";
         <!--header-->
         <div class="header">
             <h1>Youtuber GPA</h1>
-            <p>My supercool header</p>
         </div>
 
         <div class="top-right">
-            <h1>你好
-                <?php echo htmlspecialchars($_SESSION["username"]); ?>
-            </h1>
             <a href='logout.php'>登出</a>
             <a href='change.php'>更改密碼</a>
         </div>
@@ -185,9 +194,9 @@ $conn = require_once "config.php";
             <form action="" method="get">
                 <input type="text" name="search" placeholder="找影片">
                 <select name="region">
-                    <option value="UK">英国</option>
-                    <option value="US" selected>美国</option>
-                    <option value="KR">韩国</option>
+                    <option value="UK">英國</option>
+                    <option value="US" selected>美國</option>
+                    <option value="KR">韓國</option>
                     <option value="JP">日本</option>
                 </select>
                 <input type="submit" value="搜索">
@@ -253,13 +262,13 @@ $conn = require_once "config.php";
                     data-youtube-video-id='" . htmlspecialchars($row['yv_id']) . "'>&#9733</span>"; //. class # id
                 echo "</div>"; // Closing div for 'video'
                 echo "<p><a href='" . htmlspecialchars($videoUrl) . "'>" . htmlspecialchars($row['title']) . "</a></p>";
-                echo "<p>" . htmlspecialchars($row['gpa']) . "</p>";
+                echo "<p>GPA  " . htmlspecialchars($row['gpa']) . "</p>";
                 echo "</div>";
                 echo "</div>";
             }
             echo "</div>";
         } else {
-            echo "<p>没有找到视频。</p>";
+            echo "<p>沒有符合條件之影片。</p>";
         }
 
 
@@ -422,9 +431,11 @@ $conn = require_once "config.php";
                 if ($result->num_rows > 0) {
                     // 输出每个影片的信息
                     while ($row = $result->fetch_assoc()) {
-                        echo "<div class='video'>";
+                        $videoUrl = "https://www.youtube.com/watch?v=" . $row['youtube_video_id'];
+                        echo "<div class='video-title'>";
                         echo "<img src='" . htmlspecialchars($row['thumbnail_link']) . "' alt='Thumbnail'>";
-                        echo "<h3>" . htmlspecialchars($row['title']) . "</h3>";
+                        // echo "<h3>" . htmlspecialchars($row['title']) . "</h3>";
+                        echo "<p><a href='" . htmlspecialchars($videoUrl) . "'>" . htmlspecialchars($row['title']) . "</a></p>";
                         echo "</div>";
                     }
                 } else {
