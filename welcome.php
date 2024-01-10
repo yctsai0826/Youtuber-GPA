@@ -24,6 +24,10 @@ $conn = require_once "config.php";
             color: #ffffff;
         }
 
+        h2 {
+            color: #082A40;
+        }
+
 
         .header {
             grid-column: 2 / 4;
@@ -164,6 +168,77 @@ $conn = require_once "config.php";
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
+        #comment-form, #comments-display, #pagination {
+            font-family: Arial, sans-serif;
+            margin-bottom: 20px;
+        }
+
+        /* 文本区域和按钮样式 */
+        #comment-textarea {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        #comment-form button {
+            background-color: #a0ced9;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #comment-form button:hover {
+            background-color: #a3edff;
+        }
+
+        /* 评论显示区域的样式 */
+        .comment {
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            margin-bottom: 10px;
+        }
+
+        .comment p {
+            margin: 5px 0;
+            color: #082a40;
+        }
+
+        .comment strong {
+            color: #082a40;
+        }
+
+        .comment span {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        /* 分页导航样式 */
+        #pagination a {
+            text-decoration: none;
+            padding: 5px 10px;
+            border: 1px solid #a0ced9;
+            border-radius: 4px;
+            color: #a0ced9;
+        }
+
+        #pagination span {
+            padding: 5px 10px;
+            border: 1px solid #a0ced9;
+            border-radius: 4px;
+            background-color: #a0ced9;
+            color: white;
+        }
+
+        #pagination a:hover {
+            background-color: #a3edff;
+        }
         /* 响应式设计 */
         @media (max-width: 600px) {
             .youtube-videos {
@@ -322,7 +397,12 @@ $conn = require_once "config.php";
                                 var response = JSON.parse(xhr.responseText);
                                 if (response.success) {
                                     var commentsDisplay = document.getElementById('comments-display');
-                                    // 獲取當前時間並格式化為 ISO 8601 字符串
+
+                                    // 假设 'nickname' 和 'comment' 从响应中获取
+                                    var nickname = 'test'; // 示例昵称
+                                    var comment = response.comment; // 假设评论内容来自 response 对象
+
+                                    // 获取当前时间并格式化为类似于 PHP 的格式
                                     var now = new Date();
                                     var year = now.getFullYear();
                                     var month = ('0' + (now.getMonth() + 1)).slice(-2);
@@ -331,11 +411,19 @@ $conn = require_once "config.php";
                                     var minutes = ('0' + now.getMinutes()).slice(-2);
                                     var seconds = ('0' + now.getSeconds()).slice(-2);
                                     var timeString = year + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':' + seconds;
-                                    // 創建顯示留言和時間的HTML
-                                    var newCommentHTML = '<div><strong>' + 'test' + '</strong> ' + timeString + '<br>' + '<br>' + response.comment + '</div>';
-                                    // 將新留言插入到留言顯示區域的開始位置
+
+                                    // 创建显示评论和时间的 HTML
+                                    var newCommentHTML = "<div class='comment'>" +
+                                                        "<p><strong>" + nickname + "</strong> <span>" + timeString + "</span></p>" +
+                                                        "<p>" + comment + "</p>" +
+                                                        "</div>";
+
+                                    // 将新评论插入到评论显示区域的开始位置
                                     commentsDisplay.insertAdjacentHTML('afterbegin', newCommentHTML);
-                                    document.getElementById('comment-textarea').value = ''; // 清空文本區域
+
+                                    // 清空文本区域
+                                    document.getElementById('comment-textarea').value = '';
+
                                 } else {
                                     alert('Error: ' + response.error);
                                 }
@@ -385,9 +473,6 @@ $conn = require_once "config.php";
         </section>
         <!-- End of content from website.html -->
         <?php
-        // 确保已经包含了数据库连接代码
-        // 例如: $conn = new mysqli('主机', '用户名', '密码', '数据库名');
-
         $videosPerPage = 4; // 每页显示的影片数
         $videoPage = isset($_GET['videoPage']) ? (int)$_GET['videoPage'] : 1; // 当前视频页码
         $offset = ($videoPage - 1) * $videosPerPage; // 计算当前页的第一部影片的索引
