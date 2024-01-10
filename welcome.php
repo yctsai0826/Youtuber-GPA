@@ -408,12 +408,11 @@ $conn = require_once "config.php";
     <script>
         //starvideo function
         function handleStarClick(starElement) {
-            //var title = starElement.getAttribute('data-title');
             var youtube_video_id = starElement.getAttribute('data-youtube-video-id');
             var isStarred = starElement.getAttribute('data-starred');
             starVideo(youtube_video_id, starElement, isStarred);
         }
-
+        
         // 保留您现有的 starVideo 和 unstarVideo 函数
         function starVideo(youtube_video_id, starElement, isStarred) {
             var xhr = new XMLHttpRequest();
