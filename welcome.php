@@ -181,20 +181,19 @@ $conn = require_once "config.php";
         }
 
 
-        $sql = "SELECT a.v_id, a.yv_id, gpa, thumbnail_link, title ,a.sv_id
-        FROM (SELECT youtube.video_id as v_id, youtube.youtube_video_id as yv_id, gpa, thumbnail_link, title, star.video_id as sv_id,ROW_NUMBER() 
-        OVER (PARTITION BY youtube.youtube_video_id) AS rn FROM $tableName as youtube
-        LEFT JOIN star ON ( user_id = $user_id AND star.video_id = youtube.video_id)) as a ";
+        $sql = "SELECT a.v_id, a.yv_id, gpa, thumbnail_link, title ,a.syv_id
+        FROM (SELECT youtube.video_id as v_id, youtube.youtube_video_id as yv_id, gpa, thumbnail_link, title, star.youtube_video_id as syv_id
+        FROM $tableName as youtube
+        LEFT JOIN star ON ( user_id = $user_id AND star.youtube_video_id = youtube.youtube_video_id)) as a ";
         if ($search !== '') {
             $sql .= " WHERE title LIKE '%" . $conn->real_escape_string($search) . "%'";
-            $sql .= " AND rn = 1 ORDER BY gpa DESC LIMIT 10";
+            $sql .= " ORDER BY gpa DESC LIMIT 10;";
         } else {
-            $sql .= " WHERE rn = 1 ORDER BY gpa DESC LIMIT 10";
+            $sql .= "ORDER BY gpa DESC LIMIT 10;";
         }
 
-        // $sql = "SELECT video_id, thumbnail_link, title FROM youtube_trending_videos LIMIT 5";
         error_log($sql);
-
+        echo $sql;
         $result = mysqli_query($conn, $sql);
 
         // 检查查询结果
@@ -210,11 +209,11 @@ $conn = require_once "config.php";
                 echo "</div>";
                 echo "<div class='video-info'>";
                 //star
-                echo "<div class='video' data-video-id='" . $row['v_id'] . "'>"; // Fixed the syntax here
-                echo "<span class='" . (empty($row['sv_id']) ? 'star-btn' : 'star-btn on') . "' 
+                echo "<div class='video' data-youtube-video-id='" . $row['yv_id'] . "'>"; // Fixed the syntax here
+                echo "<span class='" . (empty($row['syv_id']) ? 'star-btn' : 'star-btn on') . "' 
                     onclick='handleStarClick(this)' 
-                    data-starred='" . (empty($row['sv_id']) ? 'false' : 'true') . "'
-                    data-video-id='" . htmlspecialchars($row['v_id']) . "'>&#9733</span>"; //. class # id
+                    data-starred='" . (empty($row['syv_id']) ? 'false' : 'true') . "'
+                    data-youtube-video-id='" . htmlspecialchars($row['yv_id']) . "'>&#9733</span>"; //. class # id
                 echo "</div>"; // Closing div for 'video'
                 echo "<p><a href='" . htmlspecialchars($videoUrl) . "'>" . htmlspecialchars($row['title']) . "</a></p>";
                 echo "<p>" . htmlspecialchars($row['gpa']) . "</p>";
@@ -369,6 +368,33 @@ $conn = require_once "config.php";
             <h2>Playlist</h2>
             <div id="star_video-display">
                 <?php
+                // 連接到數據庫
+                // 確保已經包含了數據庫連接代碼
+                // 例如: $conn = new mysqli('主機', '用戶名', '密碼', '數據庫名');
+                
+                // 檢查連接
+                if ($conn->connect_error) {
+                    die("連接失敗: " . $conn->connect_error);
+                }
+
+                // 假設 $user_id 包含當前用戶的 ID
+                $user_id = $_SESSION["user_id"];
+
+                // 準備 SQL 查詢來選擇所有被該用戶標記的影片
+                // 注意: 這裡我假設 'youtube_video_id' 是正確的欄位名
+                $sql = "SELECT DISTINCT youtube.youtube_video_id, youtube.title, youtube.thumbnail_link 
+                        FROM total_youtube_videos AS youtube 
+                        INNER JOIN star ON youtube.youtube_video_id = star.youtube_video_id
+                        WHERE star.user_id = ?";
+                // 預處理和綁定
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param("i", $user_id);
+
+                // 執行語句並獲取結果
+                $stmt->execute();
+                $result = $stmt->get_result();
+
+                // 檢查是否有結果
                 if ($result->num_rows > 0) {
                     // 输出每个影片的信息
                     while ($row = $result->fetch_assoc()) {
@@ -399,13 +425,13 @@ $conn = require_once "config.php";
         //starvideo function
         function handleStarClick(starElement) {
             //var title = starElement.getAttribute('data-title');
-            var video_id = starElement.getAttribute('data-video-id');
+            var youtube_video_id = starElement.getAttribute('data-youtube-video-id');
             var isStarred = starElement.getAttribute('data-starred');
-            starVideo(video_id, starElement, isStarred);
+            starVideo(youtube_video_id, starElement, isStarred);
         }
 
         // 保留您现有的 starVideo 和 unstarVideo 函数
-        function starVideo(video_id, starElement, isStarred) {
+        function starVideo(youtube_video_id, starElement, isStarred) {
             var xhr = new XMLHttpRequest();
             xhr.open("POST", "star_video.php", true);
             xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -435,25 +461,7 @@ $conn = require_once "config.php";
             };
 
             var act = isStarred === 'true' ? "unstar" : "star";
-            xhr.send("video_id=" + encodeURIComponent(video_id) + "&action=" + act);
-        }
-
-        function updatePlaylist(video_id, isStarred) {
-            event.preventDefault(); // Prevent default form submission if used within a form
-            xhr.open('POST', 'show_playlist.php', true);
-            xhr.onload = function() {
-                if (xhr.status === 200) {
-                    var response = JSON.parse(xhr.responseText);
-                    if (response.success === 'YES') {
-                        updatePlaylistDisplay(); // Update the playlist display on the page
-                    } else {
-                        alert('Error: ' + (response.error || 'Failed to update the playlist.'));
-                    }
-                } else {
-                    alert('An error occurred while updating the playlist.');
-                }
-            };
-            xhr.send(formData);
+            xhr.send("youtube_video_id=" + encodeURIComponent(youtube_video_id) + "&action=" + act);
         }
     </script>
 </body>

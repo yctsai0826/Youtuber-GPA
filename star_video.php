@@ -2,20 +2,20 @@
 session_start();
 $conn = require_once "config.php";
 
-$video_id = $_POST['video_id'];
+$youtube_video_id = $_POST['youtube_video_id'];
 $user_id = $_SESSION['user_id'];
 //error_log("user_id=" . $user_id);
 //$title = $_POST['title'];
 $action = $_POST['action'];
 
 if ($action == 'star') {
-    $stmt = $conn->prepare("INSERT INTO star (user_id, video_id) VALUES (?, ?)");
+    $stmt = $conn->prepare("INSERT INTO star (user_id, youtube_video_id) VALUES (?, ?)");
 
     if ($stmt === false) {
         $response['error'] = "Error preparing statement: " . $conn->error;
     } else {
         // 从 POST 请求获取 title
-        $stmt->bind_param("ii", $user_id, $video_id); //(int,int)
+        $stmt->bind_param("is", $user_id, $youtube_video_id); //(int,int)
 
         if ($stmt->execute()) {
             $response['success'] = 'YES';
@@ -27,12 +27,12 @@ if ($action == 'star') {
     }
     
 } elseif ($action == 'unstar') {
-    $stmt = $conn->prepare("DELETE FROM star WHERE user_id = ? AND video_id = ?");
+    $stmt = $conn->prepare("DELETE FROM star WHERE user_id = ? AND youtube_video_id = ?");
 
     if ($stmt === false) {
         $response['error'] = "Error preparing statement: " . $conn->error;
     } else {
-        $stmt->bind_param("ii", $user_id, $video_id);
+        $stmt->bind_param("is", $user_id, $youtube_video_id);
 
         if ($stmt->execute()) {
             $response['success'] = 'YES';
