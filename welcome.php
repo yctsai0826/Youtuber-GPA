@@ -463,7 +463,7 @@ if (!isset($_GET['page']) || (int)$_GET['page'] < 1) {
                     onclick='handleStarClick(this)' 
                     data-starred='" . (empty($row['syv_id']) ? 'false' : 'true') . "'
                     data-youtube-video-id='" . htmlspecialchars($row['yv_id']) . "'>&#9733</span>"; //. class # id
-                echo "<p>GPA  " . htmlspecialchars($row['gpa']) . "</p>";
+                echo "<p><img src='gpa.png' alt='GPA' style='vertical-align: middle; margin-bottom: -1px;' width='20' height='20' /> " . htmlspecialchars($row['gpa']) . "</p>";
                 echo "</div>"; // Closing div for 'star-and-gpa'
                 echo "</div>"; // Closing div for 'video'
                 echo "<p><a href='" . htmlspecialchars($videoUrl) . "'>" . htmlspecialchars($row['title']) . "</a></p>";
