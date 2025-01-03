@@ -3,7 +3,6 @@
 ## 📖 **Project Overview**
 The **Youtuber-GPA Project** is a web application designed to manage user interactions, including user registration, login, commenting, and rating videos. It integrates a backend database to store user information, video ratings, and comments, offering a seamless experience for both administrators and users.
 
----
 
 ## 🛠️ **Features**
 1. **User Registration and Authentication:**
@@ -21,7 +20,6 @@ The **Youtuber-GPA Project** is a web application designed to manage user intera
 4. **Responsive Design:**
    - Clean and user-friendly registration and login pages.
 
----
 
 ## 💻 **Setup Guide (Using XAMPP on macOS)**
 Follow these steps to set up the project using XAMPP on macOS:
@@ -65,7 +63,6 @@ $dbname = "youtuber_gpa";
 http://localhost/Youtuber-GPA/index.php
 ```
 
----
 
 ## 🚀 **Usage Instructions**
 1. **User Registration:** Visit `/register.html` to create an account.
@@ -73,7 +70,6 @@ http://localhost/Youtuber-GPA/index.php
 3. **Interact with Videos:** Rate and comment on videos.
 4. **Logout:** End your session securely via `/logout.php`.
 
----
 
 ## 📝 **Project File Descriptions**
 - **index.php:** Main landing page.
